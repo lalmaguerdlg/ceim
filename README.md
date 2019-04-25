@@ -1,2 +1,1 @@
-# ceim
-Centro de Estudios Intensivos Monterrey
+# Centro de Estudios Intensivos Monterrey
