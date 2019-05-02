@@ -21,6 +21,10 @@
 				</v-list>
 			</v-menu>
 
+			<v-btn icon flat color="grey">
+				<v-icon>notifications_none</v-icon>
+			</v-btn>
+
 			<!-- Logout -->
 			<v-btn flat color="grey">
 				<span>Sign out</span>
@@ -29,7 +33,7 @@
 		</v-toolbar>
 		<v-navigation-drawer v-model="open" class="secondary vertical-navigation" app>
 			<!-- App name -->
-			<v-toolbar dark>
+			<v-toolbar flat dark>
 				<v-list class="pt-2 pb-0" dark >
 					<v-list-tile>
 						<v-list-tile-title class="title text-xs-center font-weight-medium text-uppercase">
@@ -95,6 +99,7 @@ export default {
 			links: [
 				{ icon: 'library_books', text: 'Cursos', route: '/'},
 				{ icon: 'payment', text: 'Pagos', route: '/pagos'},
+				{ icon: 'email', text: 'Mensajes', route: '/mensajes'},
 			],
 			bottomLinks: [
 				{ icon: 'help', text: 'Ayuda', route: '/ayuda'},
