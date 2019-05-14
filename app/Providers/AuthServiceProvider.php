@@ -26,6 +26,10 @@ class AuthServiceProvider extends ServiceProvider
     {
         $this->registerPolicies();
 
+        $config_scopes = config('permissions.scopes', []);
+
+        Passport::tokensCan($config_scopes);
+
         Passport::routes(function($router) {
             $router->forAccessTokens();
         });

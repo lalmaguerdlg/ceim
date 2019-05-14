@@ -4,24 +4,36 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Foundation\Auth\AuthenticatesUsers;
+use Illuminate\Support\Facades\DB;
+use App\Repositories\ScopesRepository;
 
 class AuthController extends Controller
 {
-    //
+    use AuthenticatesUsers;
 
-    function login(Request $request) 
+    protected function authenticated(\Illuminate\Http\Request $request, $user)
     {
-        $newRequest = Request::create(config('services.passport.login_endpoint'), 'POST', [
+        $scopes_repository = new ScopesRepository();
+        $scopes_collection = $scopes_repository->getUniqueScopesForUser($user);
+        
+        $scopes = [];
+        foreach($scopes_collection as $scope) {
+            $scopes[] = $scope->scope;
+        }
+        
+        $scope_names = implode(' ', $scopes);
+
+        $new_request = Request::create(config('services.passport.login_endpoint'), 'POST', [
             'grant_type' => 'password',
             'client_id' => config('services.passport.client_id'),
             'client_secret' => config('services.passport.client_secret'),
-            'username' => $request->username,
-            'password' => $request->password
+            'username' => $request->email,
+            'password' => $request->password,
+            'scope' => $scope_names,
         ]);
 
-        //return response()->json($newRequest);
-
-        $response = app()->handle($newRequest);
+        $response = app()->handle($new_request);
 
         $code = $response->status();
 
@@ -29,6 +41,7 @@ class AuthController extends Controller
             return $response;
         }
         else {
+            return $response;
             if($code == 400){
                 return response()->json([
                     'error' => 'Invalid Request.',
@@ -84,11 +97,17 @@ class AuthController extends Controller
             'password' => ['required', 'string', 'min:8'],
         ]);
 
-        return \App\User::create([
+        $rol_alumno = \App\Auth\Rol::where('rol', 'alumno')->first();
+
+        $new_user = \App\User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
         ]);
+        $new_user->save();
+        $new_user->roles()->attach($rol_alumno);
+
+        return $new_user;
     }
 
     function logout(Request $request) 
