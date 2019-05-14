@@ -42,3 +42,16 @@ Route::group(['middleware' => ['auth:api']], function () {
     });
 
 });
+
+
+Route::get('/cursos', function(Request $request) { 
+    return \App\Http\Resources\Curso::collection(\App\Curso::all());
+});
+
+Route::get('/unidad_duracion', function(Request $request) { 
+    return \App\Http\Resources\UnidadDuracion::collection(\App\UnidadDuracion::all());
+});
+
+Route::get('/unidad_duracion', function(Request $request) { 
+    return \App\Http\Resources\UnidadDuracion::collection(\App\UnidadDuracion::all());
+});
