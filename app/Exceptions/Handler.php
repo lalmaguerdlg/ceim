@@ -50,7 +50,6 @@ class Handler extends ExceptionHandler
     public function render($request, Exception $exception)
     {
 
-        //return response()->json(['message' => 'Not Found.', 'request' => $request->wantsJson()], 404); //Route::respondWithRoute('api.fallback.404');
 
         if ($exception instanceof NotFoundHttpException && $request->wantsJson()) {
             return \Route::respondWithRoute('api.fallback.404');

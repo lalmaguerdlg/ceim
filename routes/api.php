@@ -44,21 +44,17 @@ Route::group(['middleware' => ['auth:api']], function () {
 });
 
 Route::apiResource('cursos', 'API\CursoController');
+Route::apiResource('unidades-duracion', 'API\UnidadDuracionController')->only([
+    'index', 'show'
+])->parameters([
+    'unidades-duracion' => 'unidadDuracion'
+]);
 
-/*
-Route::get('/cursos', function(Request $request) { 
-    return \App\Http\Resources\Curso::collection(\App\Curso::all());
-});
-*/
-
-Route::get('/unidad_duracion', function(Request $request) { 
-    return \App\Http\Resources\UnidadDuracion::collection(\App\UnidadDuracion::all());
-});
-
-Route::get('/imagenes', function(Request $request) { 
-    return \App\Http\Resources\Imagen::collection(\App\Imagen::all());
-});
-
+Route::apiResource('imagenes', 'API\ImagenController')->only([
+    'index', 'show'
+])->parameters([
+    'imagenes' => 'imagen'
+]);
 
 Route::fallback(function(){
     return response()->json(['message' => 'Not Found.'], 404);
