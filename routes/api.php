@@ -56,6 +56,21 @@ Route::apiResource('imagenes', 'API\ImagenController')->only([
     'imagenes' => 'imagen'
 ]);
 
+
+Route::get('/test', function(Request $request){
+    $ultima_matricula = 100000;
+    $ultima_matricula++;
+    $matricula = 'CEIM-' . str_pad($ultima_matricula, 5, "0", STR_PAD_LEFT);
+    return response()->json(['matricula' => $matricula]);
+});
+
+
+
+
+
+
+
+
 Route::fallback(function(){
     return response()->json(['message' => 'Not Found.'], 404);
 })->name('api.fallback.404');
