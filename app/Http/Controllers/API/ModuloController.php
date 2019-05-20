@@ -2,9 +2,14 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Curso;
 use App\Modulo;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\Modulo as ModuloResource;
+use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
+use function GuzzleHttp\json_encode;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class ModuloController extends Controller
 {
@@ -13,9 +18,9 @@ class ModuloController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index($curso_id)
     {
-        //
+        return ModuloResource::collection(Modulo::where('curso_id', '=', $curso_id)->get());
     }
 
     /**
@@ -24,9 +29,32 @@ class ModuloController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(Request $request, $curso_id)
     {
-        //
+        $errors = [];
+        $data = $request->validate([
+            'nombre' => 'required|max:255',
+            'descripcion' => 'required',
+        ]);
+
+        $curso = Curso::with('modulos')->find($curso_id);
+        if($curso){
+            $modulo = $curso->modulos()->whereRaw("upper(`nombre`) LIKE '%". strtoupper($data['nombre']). "%'")->first();
+            if($modulo) {
+                $errors['nombre'][] = 'El curso ya contiene un modulo con este nombre.';
+            }
+        } else {
+            throw new ModelNotFoundException();
+        }
+
+        if(count($errors) > 0) {
+            throw \Illuminate\Validation\ValidationException::withMessages($errors);
+        }
+
+        $data['curso_id'] = $curso_id;
+        $modulo = Modulo::create($data);
+        //$modulo->load('curso');
+        return ModuloResource::make($modulo);
     }
 
     /**
@@ -35,9 +63,15 @@ class ModuloController extends Controller
      * @param  \App\Modulo  $modulo
      * @return \Illuminate\Http\Response
      */
-    public function show(Modulo $modulo)
+    public function show($curso_id, $modulo_id)
     {
-        //
+        $modulo = $this->get_modulo($curso_id, $modulo_id);
+
+        if(!$modulo) {
+            throw new ModelNotFoundException();
+        }
+
+        return ModuloResource::make($modulo);
     }
 
     /**
@@ -47,9 +81,37 @@ class ModuloController extends Controller
      * @param  \App\Modulo  $modulo
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Modulo $modulo)
+    public function update(Request $request, $curso_id, $modulo_id)
     {
-        //
+        $errors = [];
+        $data = $request->validate([
+            'nombre' => 'required|max:255',
+            'descripcion' => 'required',
+        ]);
+
+        $curso = Curso::with('modulos')->find($curso_id);
+        if($curso) {
+            $modulo = $curso->modulos()->where('id', '!=', $modulo_id)->whereRaw("upper(`nombre`) LIKE '%". strtoupper($data['nombre']). "%'")->first();
+            if($modulo) {
+                $errors['nombre'][] = 'El curso ya contiene un modulo con este nombre.';
+            }
+        } else {
+            throw new ModelNotFoundException();
+        }
+
+        if(count($errors) > 0) {
+            throw \Illuminate\Validation\ValidationException::withMessages($errors);
+        }
+
+
+        $modulo = $this->get_modulo($curso_id, $modulo_id);
+        if(!$modulo) {
+            throw new ModelNotFoundException();
+        }
+
+        $modulo->fill($data);
+        $modulo->save();
+        return ModuloResource::make($modulo);
     }
 
     /**
@@ -58,8 +120,20 @@ class ModuloController extends Controller
      * @param  \App\Modulo  $modulo
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Modulo $modulo)
+    public function destroy($curso_id, $modulo_id)
     {
-        //
+        $modulo = $this->get_modulo($curso_id, $modulo_id);
+        if(!$modulo) {
+            throw new ModelNotFoundException();
+        }
+        $modulo->delete();
+        return response()->json(['message' => 'ok']);
+    }
+
+    static public function get_modulo($curso_id, $modulo_id){
+        return Modulo::where([
+            'curso_id' => $curso_id, 
+            'id' => $modulo_id
+        ])->first();
     }
 }

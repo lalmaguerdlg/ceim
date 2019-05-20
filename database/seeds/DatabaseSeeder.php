@@ -17,5 +17,6 @@ class DatabaseSeeder extends Seeder
         $this->call(UnidadDuracionTableSeeder::class);
         $this->call(ImagenesTableSeeder::class);
         $this->call(CursosTableSeeder::class);
+        $this->call(ModulosTableSeeder::class);
     }
 }

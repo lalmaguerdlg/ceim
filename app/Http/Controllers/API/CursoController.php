@@ -37,21 +37,20 @@ class CursoController extends Controller
             'unidad_duracion' => 'present|nullable|integer|bail|exists:unidad_duraciones,id',
         ]);
 
-        $unidad_id = $data['unidad_duracion'];
+        $mapped = remap_keys($data, [
+            'portada' => 'portada_id',
+            'unidad_duracion' => 'unidad_duracion_id'
+        ]);
+
+        $unidad_id = $mapped['unidad_duracion_id'];
         if($unidad_id == null) {
             $unidad_duracion = \App\UnidadDuracion::where('nombre', '=', 'Mes')->first();
             $unidad_id = $unidad_duracion->id;
+            $mapped['unidad_duracion_id'] = $unidad_id;
         }
         
-        $curso = Curso::create([
-            'nombre' => $data['nombre'],
-            'descripcion' => $data['descripcion'],
-            'portada_id' => $data['portada'],
-            'duracion' => $data['duracion'],
-            'unidad_duracion_id' => $unidad_id,
-        ]);
-        $curso->save();
-        return new CursoResource($curso);
+        $curso = Curso::create($mapped);
+        return CursoResource::make($curso);
     }
 
     /**
@@ -62,7 +61,7 @@ class CursoController extends Controller
      */
     public function show(Curso $curso)
     {
-        return new CursoResource($curso);
+        return CursoResource::make($curso);
     }
 
     /**
@@ -89,7 +88,7 @@ class CursoController extends Controller
 
         $curso->fill($mapped);
         $curso->save();
-        return new CursoResource($curso);
+        return CursoResource::make($curso);
     }
 
     /**
@@ -101,8 +100,7 @@ class CursoController extends Controller
     public function destroy(Curso $curso)
     {
         $curso->delete();
+        return response()->json(['message' => 'ok']);
     }
-
-
 
 }

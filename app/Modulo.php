@@ -16,4 +16,8 @@ class Modulo extends Model
     public function curso() {
         return $this->belongsTo(\App\Curso::class);
     }
+
+    public function materiales() {
+        return $this->hasMany(\App\Material::class);
+    }
 }

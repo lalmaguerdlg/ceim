@@ -4,6 +4,8 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 
+use App\Http\Resources\Material as MaterialResource;
+
 class Modulo extends JsonResource
 {
     /**
@@ -14,6 +16,15 @@ class Modulo extends JsonResource
      */
     public function toArray($request)
     {
-        return parent::toArray($request);
+        return [
+            'id' => $this->id,
+            'nombre' => $this->nombre,
+            'descripcion' => $this->descripcion,
+            'curso' => [
+                'id' => $this->curso->id,
+                'nombre' => $this->curso->nombre
+            ],
+            'materiales' => MaterialResource::collection($this->materiales)
+        ];
     }
 }

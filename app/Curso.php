@@ -26,4 +26,8 @@ class Curso extends Model
         return $this->belongsTo(UnidadDuracion::class);
     }
 
+    public function modulos() {
+        return $this->hasMany(\App\Modulo::class);
+    }
+
 }

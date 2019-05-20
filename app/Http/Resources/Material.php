@@ -4,10 +4,7 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 
-use \App\Http\Resources\Imagen as ImagenResource;
-use \App\Http\Resources\UnidadDuracion as UnidadDuracionResource;
-
-class Curso extends JsonResource
+class Material extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -20,10 +17,6 @@ class Curso extends JsonResource
         return [
             'id' => $this->id,
             'nombre' => $this->nombre,
-            'descripcion' => $this->descripcion,
-            'portada' => ImagenResource::make($this->portada),
-            'duracion' => $this->duracion,
-            'unidad_duracion' => UnidadDuracionResource::make($this->unidad_duracion),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

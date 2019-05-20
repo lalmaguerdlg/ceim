@@ -43,35 +43,25 @@ Route::group(['middleware' => ['auth:api']], function () {
 
 });
 
-Route::apiResource('cursos', 'API\CursoController');
-Route::apiResource('unidades-duracion', 'API\UnidadDuracionController')->only([
+Route::apiResource('curso', 'API\CursoController');
+Route::apiResource('curso.modulo', 'API\ModuloController');
+Route::apiResource('curso.modulo.material', 'API\MaterialController');
+Route::apiResource('unidad-duracion', 'API\UnidadDuracionController')->only([
     'index', 'show'
-])->parameters([
-    'unidades-duracion' => 'unidadDuracion'
 ]);
 
-Route::apiResource('imagenes', 'API\ImagenController')->only([
+Route::apiResource('imagen', 'API\ImagenController')->only([
     'index', 'show'
-])->parameters([
-    'imagenes' => 'imagen'
 ]);
 
 
 Route::get('/test', function(Request $request){
-    $ultima_matricula = 100000;
-    $ultima_matricula++;
-    $matricula = 'CEIM-' . str_pad($ultima_matricula, 5, "0", STR_PAD_LEFT);
-    return response()->json(['matricula' => $matricula]);
+    return \App\Curso::find(1)->modulos;
 });
 
 
 
-
-
-
-
-
 Route::fallback(function(){
-    return response()->json(['message' => 'Not Found.'], 404);
+    return response()->json(['message' => 'Not found.'], 404);
 })->name('api.fallback.404');
 

@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 class Handler extends ExceptionHandler
 {
@@ -49,14 +50,12 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Exception $exception)
     {
-
-
         if ($exception instanceof NotFoundHttpException && $request->wantsJson()) {
             return \Route::respondWithRoute('api.fallback.404');
         }
 
         if ($exception instanceof ModelNotFoundException && $request->wantsJson()) {
-            return \Route::respondWithRoute('api.fallback.404');
+            return response()->json(['message' => 'Model not found.'], 404);
         }
 
         return parent::render($request, $exception);
