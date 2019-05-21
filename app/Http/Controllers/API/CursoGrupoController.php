@@ -31,9 +31,23 @@ class CursoGrupoController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(Request $request, $curso_id)
     {
-        //
+        $data = $request->validate([
+            'inicio_curso' => 'required|date|bail|after:yesterday',
+            'fin_curso' => 'nullable|date|bail|after:inicio_curso',
+            'maestro' => 'present|nullable|integer|bail|exists:user,id',
+        ]);
+
+        $mapped = remap_keys($data, ['maestro' => 'maestro_id']);
+
+        $curso = Curso::find($curso_id);
+        if(!$curso) 
+            throw new ModelNotFoundException();
+
+        $mapped['curso_id'] = $curso->id;
+        $grupo = Grupo::create($mapped);
+        return GrupoResource::make($grupo);
     }
 
     /**
