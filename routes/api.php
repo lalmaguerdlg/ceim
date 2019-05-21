@@ -46,6 +46,12 @@ Route::group(['middleware' => ['auth:api']], function () {
 Route::apiResource('curso', 'API\CursoController');
 Route::apiResource('curso.modulo', 'API\ModuloController');
 Route::apiResource('curso.modulo.material', 'API\MaterialController');
+
+Route::apiResource('curso.grupo', 'API\CursoGrupoController');
+Route::apiResource('grupo', 'API\GrupoController')->only(['index', 'show']);
+
+Route::apiResource('inscripcion', 'API\InscripcionController');
+
 Route::apiResource('unidad-duracion', 'API\UnidadDuracionController')->only([
     'index', 'show'
 ]);
@@ -56,7 +62,7 @@ Route::apiResource('imagen', 'API\ImagenController')->only([
 
 
 Route::get('/test', function(Request $request){
-    return \App\Curso::find(1)->modulos;
+    return \App\Curso::find(1)->grupos()->first()->alumnos;
 });
 
 

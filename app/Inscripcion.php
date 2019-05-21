@@ -18,6 +18,6 @@ class Inscripcion extends Model
     }
 
     public function alumno() {
-        return $this->belongsTo(\App\User::class);
+        return $this->belongsTo(\App\User::class, 'user_id', 'id');
     }
 }

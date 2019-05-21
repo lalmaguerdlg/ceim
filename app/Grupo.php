@@ -10,7 +10,7 @@ class Grupo extends Model
     protected $table = 'grupos';
 
     protected $fillable = [
-        'curso_id', 'inicio_curso', 'fin_curso', 'maestro', 'capacidad',
+        'curso_id', 'inicio_curso', 'fin_curso', 'maestro_id', 'capacidad',
     ];
 
     public function curso() {
@@ -22,11 +22,11 @@ class Grupo extends Model
     }
 
     public function maestro() {
-        return $this->belongsTo(\App\User::class, 'id', 'maestro');
+        return $this->belongsTo(\App\User::class, 'maestro_id', 'id');
     }
 
     public function alumnos() {
-        return $this->hasManyThrough(\App\User::class, \App\Inscripcion::class);
+        return $this->hasManyThrough(\App\User::class, \App\Inscripcion::class, 'grupo_id', 'id', 'id', 'user_id');
     }
 
 }

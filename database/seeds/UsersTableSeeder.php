@@ -26,14 +26,15 @@ class UsersTableSeeder extends Seeder
         $user->save();
         $user->roles()->attach($role);
 
-        /*
-        DB::table('users')->insert([
-            'name' => 'admin',
-            'email' => 'admin@admin.com',
+        $alumno_role = Rol::where('rol', 'alumno')->first();
+        $user = App\User::create([
+            'name' => 'alumno',
+            'email' => 'alumno@alumno.com',
             'email_verified_at' => now(),
             'password' => bcrypt('password'), // password
             'remember_token' => Str::random(10)
         ]);
-        */
+        $user->save();
+        $user->roles()->attach($alumno_role);
     }
 }

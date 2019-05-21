@@ -29,6 +29,6 @@ class CreateInscripcionesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('grupo_usuario');
+        Schema::dropIfExists('inscripciones');
     }
 }
