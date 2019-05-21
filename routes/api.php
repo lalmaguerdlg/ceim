@@ -33,12 +33,8 @@ Route::group(['middleware' => ['auth:api']], function () {
     });
 
     Route::get('/permissions', function(Request $request) {
-        $user = $request->user();
-    
-        $scopes_repository = new ScopesRepository();
-        $scopes = $scopes_repository->getUniqueScopesForUser($user);
-        
-        return $scopes;
+        $user = $request->user();       
+        return $user->scopes;
     });
 
 });
@@ -46,11 +42,16 @@ Route::group(['middleware' => ['auth:api']], function () {
 Route::apiResource('curso', 'API\CursoController');
 Route::apiResource('curso.modulo', 'API\ModuloController');
 Route::apiResource('curso.modulo.material', 'API\MaterialController');
-
 Route::apiResource('curso.grupo', 'API\CursoGrupoController');
-Route::apiResource('grupo', 'API\GrupoController')->only(['index', 'show']);
+
+Route::group(['middleware' => 'auth:api'], function()
+{
+    Route::apiResource('maestro/grupo', 'API\MaestroGrupoController')->only(['index', 'show']);
+    Route::apiResource('alumno/grupo', 'API\AlumnoGrupoController')->only(['index', 'show']);
+});
 
 Route::apiResource('inscripcion', 'API\InscripcionController');
+
 
 Route::apiResource('unidad-duracion', 'API\UnidadDuracionController')->only([
     'index', 'show'
@@ -60,11 +61,10 @@ Route::apiResource('imagen', 'API\ImagenController')->only([
     'index', 'show'
 ]);
 
-
-Route::get('/test', function(Request $request){
-    return \App\Curso::find(1)->grupos()->first()->alumnos;
+Route::get('/test', function(Request $request) {
+    $user = \App\User::where('email', 'admin@admin.com')->first();
+    return $user->isAllowed('cursos-teach') ? 'El usuario tiene permitido enseñar' : 'El usuario no tiene permitido enseñar';
 });
-
 
 
 Route::fallback(function(){

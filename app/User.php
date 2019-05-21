@@ -6,10 +6,12 @@ use Laravel\Passport\HasApiTokens;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use App\Repositories\ScopesRepository;
+use App\Traits\HasScopes;
 
 class User extends Authenticatable
  {
-    use HasApiTokens, Notifiable;
+    use HasScopes, HasApiTokens, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -46,12 +48,20 @@ class User extends Authenticatable
         return $this->belongsToMany('\App\Auth\Rol')->withTimestamps();
     }
 
+    public function avatar() {
+        return $this->belongsTo(\App\Imagen::class, 'avatar_id', 'id');
+    }
+
     public function imparte_grupos() {
-        return $this->hasMany(\App\Grupo::class, 'maestro', 'id');
+        return $this->hasMany(\App\Grupo::class, 'maestro_id', 'id');
     }
 
     public function inscripciones() {
         return $this->hasMany(\App\Inscripcion::class);
+    }
+
+    public function grupos_inscritos() {
+        return $this->hasManyThrough(\App\Grupo::class, \App\Inscripcion::class, 'user_id', 'id', 'id', 'grupo_id');
     }
 
 }

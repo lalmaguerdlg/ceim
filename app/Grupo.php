@@ -13,6 +13,11 @@ class Grupo extends Model
         'curso_id', 'inicio_curso', 'fin_curso', 'maestro_id', 'capacidad',
     ];
 
+    protected $casts = [
+        'inicio_curso' => 'datetime',
+        'fin_curso' => 'datetime',
+    ];
+
     public function curso() {
         return $this->belongsTo(\App\Curso::class);
     }

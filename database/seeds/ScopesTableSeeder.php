@@ -13,18 +13,19 @@ class ScopesTableSeeder extends Seeder
     public function run()
     {
         DB::table('scopes')->delete();
-
         $scopes = [];
         $config_scopes = config('permissions.scopes', []);
         foreach ($config_scopes as $scope => $description) {
             $scopes[] = [ 'scope' => $scope, 'descripcion' => $description];
         }
-
         DB::table('scopes')->insert($scopes);
-
+        
+        // Obtener y asignar todos los scopes al admin
         $scopes = \App\Auth\Scope::all();
         $admin = \App\Auth\Rol::where('rol', 'admin')->first();
         $admin->scopes()->detach();
         $admin->scopes()->attach($scopes);
+
+
     }
 }

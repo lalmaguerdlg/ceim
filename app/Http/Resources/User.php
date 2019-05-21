@@ -3,7 +3,7 @@
 namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
-
+use App\Http\Resources\Imagen as ImagenResource;
 class User extends JsonResource
 {
     /**
@@ -18,6 +18,7 @@ class User extends JsonResource
             'id'=> $this->id,
             'name'=> $this->name,
             'email'=> $this->email,
+            'avatar' => ImagenResource::make($this->avatar),
             // info only for admin users
             // 'email_verified_at'=> '2019-05-21 02=>55=>05',
             // 'created_at'=> '2019-05-21 02=>55=>05',

@@ -8,6 +8,9 @@ use App\Curso;
 use App\Grupo;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use App\Http\Resources\Grupo as GrupoResource;
+use App\User;
+use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Carbon;
 
 class CursoGrupoController extends Controller
 {
@@ -22,7 +25,8 @@ class CursoGrupoController extends Controller
         if(!$curso) 
             throw new ModelNotFoundException();
         
-        return GrupoResource::collection($curso->grupos);
+        $grupos = $curso->grupos()->with('maestro.avatar')->withCount('inscripciones')->get();
+        return GrupoResource::collection($grupos);
     }
 
     /**
@@ -31,9 +35,33 @@ class CursoGrupoController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(Request $request, $curso_id)
     {
-        //
+        $data = $request->validate([
+            'inicio_curso' => 'required|date|bail|after:yesterday',
+            'fin_curso' => 'present|nullable|date|bail|after:inicio_curso',
+            'maestro' => 'present|nullable|integer|bail|exists:users,id',
+            'capacidad' => 'required|integer',
+        ]);
+
+        $curso = Curso::find($curso_id);
+        if(!$curso) 
+            throw new ModelNotFoundException();
+
+        $mapped = remap_keys($data, ['maestro' => 'maestro_id']);
+
+        $mapped['curso_id'] = $curso->id;
+        $mapped['inicio_curso'] = Carbon::parse($mapped['inicio_curso']);
+        $mapped['fin_curso'] = $mapped['fin_curso'] !== null ? Carbon::parse($mapped['fin_curso']) : null;
+        if($mapped['maestro_id'] != null){
+            $maestro = User::find($mapped['maestro_id']);
+            if( !$maestro->isAllowed('cursos-teach') ) {
+                throw ValidationException::withMessages([ 'maestro' => 'Este usuario no tiene permitido ser maestro de un grupo' ]);
+            }
+        }
+        //dd($mapped);
+        $grupo = Grupo::create($mapped);
+        return GrupoResource::make($grupo);
     }
 
     /**
@@ -44,8 +72,7 @@ class CursoGrupoController extends Controller
      */
     public function show($curso_id, $grupo_id)
     {
-        //
-        $grupo = Grupo::with('curso')->where(['curso_id' => $curso_id, 'id' => $grupo_id])->first();
+        $grupo = Grupo::with('curso')->withCount('inscripciones')->where(['curso_id' => $curso_id, 'id' => $grupo_id])->first();
         if(!$grupo) 
             throw new ModelNotFoundException();
         
@@ -59,9 +86,32 @@ class CursoGrupoController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, $curso_id, $grupo_id)
     {
-        //
+        $data = $request->validate([
+            'inicio_curso' => 'date|bail|after:yesterday',
+            'fin_curso' => 'nullable|date|bail|after:inicio_curso',
+            'maestro' => 'nullable|integer|bail|exists:users,id',
+            'capacidad' => 'integer',
+        ]);
+
+        $grupo = Grupo::with('curso')->withCount('inscripciones')->where(['curso_id' => $curso_id, 'id' => $grupo_id])->first();
+        if(!$grupo) 
+            throw new ModelNotFoundException();
+
+        $mapped = remap_keys($data, ['maestro' => 'maestro_id']);
+
+        $mapped['inicio_curso'] = Carbon::parse($mapped['inicio_curso']);
+        $mapped['fin_curso'] = $mapped['fin_curso'] !== null ? Carbon::parse($mapped['fin_curso']) : null;
+        if($mapped['maestro_id'] != null){
+            $maestro = User::find($mapped['maestro_id']);
+            if( !$maestro->isAllowed('cursos-teach') ) {
+                throw ValidationException::withMessages([ 'maestro' => 'Este usuario no tiene permitido ser maestro de un grupo' ]);
+            }
+        }
+        $grupo->fill($mapped);
+        $grupo->save();
+        return GrupoResource::make($grupo);
     }
 
     /**
@@ -70,8 +120,12 @@ class CursoGrupoController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy($curso_id, $grupo_id)
     {
-        //
+        $grupo = Grupo::where(['curso_id' => $curso_id, 'id' => $grupo_id])->first();
+        if(!$grupo) 
+            throw new ModelNotFoundException();
+        $grupo->delete();
+        return response()->json(['message' => 'ok']);
     }
 }
