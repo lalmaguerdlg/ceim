@@ -45,4 +45,13 @@ class User extends Authenticatable
     public function roles() {
         return $this->belongsToMany('\App\Auth\Rol')->withTimestamps();
     }
+
+    public function imparte_grupos() {
+        return $this->hasMany(\App\Grupo::class, 'maestro', 'id');
+    }
+
+    public function inscripciones() {
+        return $this->hasMany(\App\Inscripcion::class);
+    }
+
 }
