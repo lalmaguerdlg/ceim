@@ -17,7 +17,7 @@ class CreateGruposTable extends Migration
             $table->bigIncrements('id');
             $table->bigInteger('curso_id');
             $table->dateTime('inicio_curso');
-            $table->dateTime('fin_curso');
+            $table->dateTime('fin_curso')->nullable();
             $table->bigInteger('maestro_id')->nullable();
             $table->integer('capacidad');
 

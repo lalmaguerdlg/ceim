@@ -4,18 +4,21 @@ namespace App\Http\Controllers\API;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Grupo;
+use App\Http\Resources\Grupo as GrupoResource;
 
-class GrupoController extends Controller
+class MaestroGrupoController extends Controller
 {
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
-
+        $user = $request->user();
+        $grupos = $user->imparte_grupos()->with('curso.portada')->with('maestro.avatar')->withCount('inscripciones')->get();
+        return GrupoResource::collection($grupos);
     }
 
     /**
@@ -35,9 +38,11 @@ class GrupoController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Request $request, $id)
     {
-        //
+        $user = $request->user();
+        $grupo = $user->imparte_grupos()->with('curso.portada')->with('maestro.avatar')->withCount('inscripciones')->where('id', $id)->first();
+        return GrupoResource::make($grupo);
     }
 
     /**
