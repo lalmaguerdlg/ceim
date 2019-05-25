@@ -1,0 +1,26 @@
+
+body.homepage .section {
+	min-height: 40em;
+	height: 100vh;
+}
+
+	.section.sub-section {
+		background: #dc7474;
+	}
+
+@media screen and (max-width: 736px) {
+	body.homepage #header {
+		min-height: 0;
+		padding: 5.5em 0 5em 0;
+		height: 100vh !important;
+	}
+
+	body.homepage .section {
+		min-height: 0;
+		padding: 5.5em 0 5em 0;
+	}
+}
+
+#nav a {
+	color: white !important;
+}
