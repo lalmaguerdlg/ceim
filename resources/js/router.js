@@ -8,6 +8,7 @@ import DashView from './components/Dash.vue'
 import GruposView from './components/views/Grupos.vue'
 import GrupoView from './components/views/Grupo.vue'
 import ModuloView from './components/views/Modulo.vue'
+import PerfilView from './components/views/Perfil.vue'
 
 /*
 import Login from './views/Login.vue'
@@ -36,6 +37,14 @@ const routes = [
 			{
 				path: 'grupo/:id/modulo/:id_modulo',
 				component: ModuloView,
+			},
+			{
+				path: 'usuario',
+				component: PerfilView,
+			},
+			{
+				path: 'usuario/:id',
+				component: PerfilView,
 			},
 		]
 	},

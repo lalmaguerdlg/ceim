@@ -1,22 +1,18 @@
 <template>
 	<div>
-		<h1>{{perfil.nombre}}</h1>
-		<p>{{perfil.edad}}</p>
-
-		<h1>{{perfilBlade.nombre}}</h1>
-		<p>{{perfilBlade.edad}}</p>
+		<h1>{{id}}</h1>
 	</div>
 </template>
 
 <script>
 export default {
-	props: ['perfilBlade'],
 	data() {
 		return {
-			perfil: {
-				nombre: '',
-				edad: 0
-			}
+		}
+	},
+	computed: {
+		id() {
+			return this.$route.params.id ? this.$route.params.id : 0;
 		}
 	}
 }
