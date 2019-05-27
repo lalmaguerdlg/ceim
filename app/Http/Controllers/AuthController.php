@@ -12,6 +12,16 @@ class AuthController extends Controller
 {
     use AuthenticatesUsers;
 
+    protected function sendLoginResponse(Request $request)
+    {
+        //$request->session()->regenerate();
+
+        $this->clearLoginAttempts($request);
+
+        return $this->authenticated($request, $this->guard()->user())
+                ?: redirect()->intended($this->redirectPath());
+    }
+
     protected function authenticated(\Illuminate\Http\Request $request, $user)
     {
         $scopes_repository = new ScopesRepository();
@@ -110,12 +120,15 @@ class AuthController extends Controller
         return $new_user;
     }
 
-    function logout(Request $request) 
+    public function logout(Request $request) 
     {
+        //$this->guard()->logout();
+
         auth()->user()->tokens->each(function ($token, $key) {
             $token->revoke();
         });
 
         return response()->json('Logged out successfully', 200);
     }
+
 }
