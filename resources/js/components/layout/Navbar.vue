@@ -4,7 +4,7 @@
 			<v-toolbar-side-icon class="grey--test" @click="open = !open"></v-toolbar-side-icon>
 			<!-- Logo -->
 			<v-toolbar-title class="text-uppercase grey--text">
-				<span class="font-weight-medium">CEIM</span>
+				<router-link class="font-weight-medium route-link" to="/"> CEIM</router-link>
 			</v-toolbar-title>
 			<v-spacer></v-spacer>
 			
@@ -26,8 +26,8 @@
 			</v-btn>
 
 			<!-- Logout -->
-			<v-btn flat color="grey">
-				<span>Sign out</span>
+			<v-btn flat color="grey" @click="logout">
+				<span>Cerrar sesion</span>
 				<v-icon right>exit_to_app</v-icon>
 			</v-btn>
 		</v-toolbar>
@@ -88,10 +88,10 @@
 </template>
 
 <script>
-import Popup from './Popup.vue'
+
+import { userService } from '../../services'
 
 export default {
-	components: { Popup },
 	data() {
 		return {
 			open: null,
@@ -105,6 +105,12 @@ export default {
 				{ icon: 'help', text: 'Ayuda', route: '/ayuda'},
 			],
 			snackbar: false,
+		}
+	},
+
+	methods: {
+		async logout() {
+			let response = await userService.logout();
 		}
 	}
 }

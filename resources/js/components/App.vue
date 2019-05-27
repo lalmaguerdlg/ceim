@@ -1,29 +1,35 @@
 <template>
 	<div>
-		<v-app class="grey lighten-4">
+		<router-view></router-view>
+		<!-- <v-app class="grey lighten-4">
 			<navbar/>
 			<v-content class="mx-4 mb-4">
 				<v-container fluid>
 					<router-view></router-view>
 				</v-container>
 			</v-content>
-		</v-app>
+		</v-app> -->
 	</div>
 </template>
 
 <script>
-import Navbar from './components/Navbar.vue'
-import ExampleComponent from './components/ExampleComponent.vue'
+
+import Navbar from './layout/Navbar.vue'
 
 export default {
 	name: 'app',
 	components: {
-		Navbar,
-		ExampleComponent
+		Navbar
 	}
 }
+
 </script>
 
 <style>
+
+a.route-link {
+	text-decoration: none !important;
+	color: inherit !important;
+}
 
 </style>
