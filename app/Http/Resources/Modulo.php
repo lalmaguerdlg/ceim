@@ -20,10 +20,12 @@ class Modulo extends JsonResource
             'id' => $this->id,
             'nombre' => $this->nombre,
             'descripcion' => $this->descripcion,
-            'curso' => [
-                'id' => $this->curso->id,
-                'nombre' => $this->curso->nombre
-            ],
+            'curso' => $this->whenLoaded('curso', function() {
+                return [
+                    'id' => $this->curso->id,
+                    'nombre' => $this->curso->nombre
+                ];
+            }, $this->curso_id),
             'materiales' => MaterialResource::collection($this->materiales)
         ];
     }
