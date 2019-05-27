@@ -64,4 +64,8 @@ class User extends Authenticatable
         return $this->hasManyThrough(\App\Grupo::class, \App\Inscripcion::class, 'user_id', 'id', 'id', 'grupo_id');
     }
 
+    public function comentarios_realizados() {
+        return $this->hasMany(\App\Comentario::class, 'author_id');
+    }
+
 }

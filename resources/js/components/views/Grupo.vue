@@ -78,47 +78,96 @@
 						</v-list>
 					</v-tab-item>
 					<v-tab-item :value="'tabs-mensajes'">
-						<v-form>
+						<v-form class="mb-0">
 							<v-container>
 								<v-layout row wrap>
 									<v-flex xs12>
 										<v-text-field
 											v-model="message"
+											:prepend-icon="fileDialog.radios == 'video' ? 'ondemand_video' : 'photo'"
 											append-outer-icon="send"
 											box
-											clear-icon="mdi-close-circle"
+											clear-icon="close"
 											clearable
 											label="Deja un mensaje"
 											type="text"
 											@click:append-outer="sendMessage"
+											@click:prepend="fileDialog.show = !fileDialog.show"
 										></v-text-field>
+										<v-dialog v-model="fileDialog.show">
+											<v-card>
+												<v-card-title>Subir un archivo</v-card-title>
+												<v-divider></v-divider>
+												<v-card-text>
+													<v-container>
+													<v-text-field v-if="fileDialog.radios == 'video'"
+														prepend-icon="link"
+														clear-icon="close"
+														clearable
+														label="Url del video"
+														type="text"
+														v-model="fileDialog.url"
+														></v-text-field>							
+													<file-select v-else 
+														label="Porfavor selecciona una imagen"
+														accept=".jpg,.png,.jpeg"
+														v-on:formData="imageSelected"></file-select>
+													<v-radio-group v-model="fileDialog.radios" row>
+														<v-radio label="Video" value="video"></v-radio>
+														<v-radio label="Imagen" value="image"></v-radio>
+													</v-radio-group>
+													</v-container>
+												</v-card-text>
+												<v-divider></v-divider>
+												<v-card-actions>
+													<v-btn color="blue darken-1" flat @click="fileDialog.show = false">Cerrar</v-btn>
+													<v-btn color="blue darken-1" flat @click="fileDialog.show = false">Guardar</v-btn>
+												</v-card-actions>
+											</v-card>
+										</v-dialog>
 									</v-flex>
 								</v-layout>
 							</v-container>
 						</v-form>
-						<v-timeline
-							align-top
-							dense>
-							<v-timeline-item
-								v-for="comment of comments"
-								:key="`comment-${comment.id}`"
-								:color="isTeacher(comment.user) ? 'pink' : 'teal'"
-								small>
-								<v-layout  pt-3>
-									<v-flex xs3 class="text-truncate">
-										<v-avatar size="30"> <img :src="comment.user.avatar.url" alt="avatar"></v-avatar>
-										<strong class="ml-2 ">{{comment.user.name}}</strong>
-									</v-flex>
-									<v-flex xs9>
-										<div class="caption">{{comment.message}}</div>
-									</v-flex>
-								</v-layout>
+						<v-timeline  dense class="mt-0">
+							<v-timeline-item v-for="comment of comments" :key="`comment-${comment.id}`"
+								:color="isTeacher(comment.user) ? 'pink' : 'teal'" 
+								small
+								class="my-1">
+								<template v-slot:icon v-if="$vuetify.breakpoint.xs">
+									<v-avatar size="40" ><img :src="comment.user.avatar.url" alt="avatar"></v-avatar>
+								</template>
+								<v-card>
+									<v-card-text>
+										<v-layout align-center>
+											<v-flex sm1 v-if="$vuetify.breakpoint.smAndUp">
+												<v-tooltip bottom>
+													<template v-slot:activator="{ on }">
+														<v-avatar size="40" v-on="on"><img :src="comment.user.avatar.url" alt="avatar"></v-avatar>
+													</template>
+													<span>{{comment.user.name}}</span>
+												</v-tooltip>
+											</v-flex>
+											<v-flex xs12 sm10>
+												<div class="caption">{{comment.message}}</div>
+												<v-btn flat icon v-if="comment.media" @click="showContent(comment)"><v-icon>{{mediaType(comment.media)}}</v-icon></v-btn>		
+											</v-flex>
+										</v-layout>
+	
+									</v-card-text>
+								</v-card>
 							</v-timeline-item>
       					</v-timeline>
 					</v-tab-item>
 				</v-tabs-items>
 			</v-card-text>
 		</v-card>
+		<v-dialog v-model="contentDialog" max-width="700">
+				<div v-if="content.video" class="iframe-container">
+					<iframe width="560" height="315" frameborder="0" :src="content.url"></iframe>
+				</div>
+				<v-img v-else :src="content.url"></v-img>
+		</v-dialog>
 	</div>
 	</v-container>
 </template>
@@ -126,18 +175,46 @@
 <script>
 
 import { mapGetters, mapActions } from 'vuex'
+import FileSelect from '../widgets/FileSelect.vue'
+
+
+function validateYoutubeUrl(url) {
+	let embedUrl = '';
+	if (url != undefined || url != '') {
+		var regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=|\?v=)([^#\&\?]*).*/;
+		var match = url.match(regExp);
+		if (match && match[2].length == 11) {
+			embedUrl = 'https://www.youtube.com/embed/' + match[2] + '?autoplay=0';
+		}
+	}
+	return embedUrl;
+}
 
 export default {
+	components: {
+		FileSelect
+	},
 	data() {
 		return {
-			tabs: null,
+			tabs: 'tabs-mensajes',
 			message: "",
 			comments: [
-				{"id": 1, "message": "This is a commented text", "user": {id: 1, name: "Luis Adrian Almaguer de la Garza", avatar: { url: "http://localhost:8000/images/placeholder.jpg"}} },
-				{"id": 2, "message": "This is a commented text", "user": {id: 2, name: "Max", avatar: { url: "https://avataaars.io/?avatarStyle=Circle&topType=LongHairFrida&accessoriesType=Kurt&hairColor=Red&facialHairType=BeardLight&facialHairColor=BrownDark&clotheType=GraphicShirt&clotheColor=Gray01&graphicType=Skull&eyeType=Wink&eyebrowType=RaisedExcitedNatural&mouthType=Disbelief&skinColor=Brown"}} },
-				{"id": 3, "message": "This is a commented text", "user": {id: 2, name: "Max", avatar: { url: "https://avataaars.io/?avatarStyle=Circle&topType=LongHairFrida&accessoriesType=Kurt&hairColor=Red&facialHairType=BeardLight&facialHairColor=BrownDark&clotheType=GraphicShirt&clotheColor=Gray01&graphicType=Skull&eyeType=Wink&eyebrowType=RaisedExcitedNatural&mouthType=Disbelief&skinColor=Brown"}} },
-				{"id": 4, "message": "This is a commented text", "user": {id: 2, name: "Max", avatar: { url: "https://avataaars.io/?avatarStyle=Circle&topType=LongHairFrida&accessoriesType=Kurt&hairColor=Red&facialHairType=BeardLight&facialHairColor=BrownDark&clotheType=GraphicShirt&clotheColor=Gray01&graphicType=Skull&eyeType=Wink&eyebrowType=RaisedExcitedNatural&mouthType=Disbelief&skinColor=Brown"}} },
-			]
+				{"id": 1, "message": "This is a commented text", media: { url: 'https://www.youtube.com/embed/e0Meo8ablI8', type: 'video'},"user": {id: 1, name: "Luis Adrian Almaguer de la Garza", avatar: { url: "http://localhost:8000/images/placeholder.jpg"}} },
+				{"id": 2, "message": "This is a commented text", media: { url: 'https://www.w3schools.com/w3images/fjords.jpg', type: 'image'}, "user": {id: 2, name: "Max", avatar: { url: "https://avataaars.io/?avatarStyle=Circle&topType=LongHairFrida&accessoriesType=Kurt&hairColor=Red&facialHairType=BeardLight&facialHairColor=BrownDark&clotheType=GraphicShirt&clotheColor=Gray01&graphicType=Skull&eyeType=Wink&eyebrowType=RaisedExcitedNatural&mouthType=Disbelief&skinColor=Brown"}} },
+				{"id": 3, "message": "This is a commented text", media: { url: 'https://www.youtube.com/embed/74O6cGGGxeA', type: 'video'}, "user": {id: 2, name: "Max", avatar: { url: "https://avataaars.io/?avatarStyle=Circle&topType=LongHairFrida&accessoriesType=Kurt&hairColor=Red&facialHairType=BeardLight&facialHairColor=BrownDark&clotheType=GraphicShirt&clotheColor=Gray01&graphicType=Skull&eyeType=Wink&eyebrowType=RaisedExcitedNatural&mouthType=Disbelief&skinColor=Brown"}} },
+				{"id": 4, "message": "This is a commented text", media: { url: 'https://www.ostraining.com/cdn/images/coding/responsivevideos_1.jpg', type: 'image'}, "user": {id: 3, name: "Mark", avatar: { url: "https://avataaars.io/?avatarStyle=Circle&topType=NoHair&accessoriesType=Blank&facialHairType=MoustacheFancy&facialHairColor=BrownDark&clotheType=ShirtScoopNeck&clotheColor=Blue02&eyeType=Side&eyebrowType=SadConcernedNatural&mouthType=ScreamOpen&skinColor=Yellow"}} },
+			],
+			contentDialog: false,
+			content: { 
+				url: '',
+				video: false,
+			},
+			fileDialog: {
+				show: false,
+				radios: 'video',
+				fileData: null,
+				url: ''
+			},
 		}
 	},
 	computed: {
@@ -150,23 +227,57 @@ export default {
 		}
 	},
 	created() {
-		/*if(this.grupos.length == 0) {
-			this.fetchGrupos();
-		}*/
 		this.fetchGrupoDetails(this.id);
 	},
 	methods: {
 		...mapActions('alumno', ['fetchGrupoDetails']),
 		sendMessage() {
-			message = "";
+			let hasFile = false;
+			let embed = '';
+			if(this.fileDialog.radios == 'video' && this.fileDialog.url != '') {
+				embed = validateYoutubeUrl(this.fileDialog.url)
+				if(embed != '')
+					hasFile = true;
+			}
+			else if(this.fileDialog.radios == 'image' && this.fileDialog.fileData != null) {
+				hasFile = true;
+			}
+
+			console.log(this.message, hasFile ? this.fileDialog.radios == 'video' ? embed : this.fileDialog.fileData : '');
+			this.message = "";
 		},
 		isTeacher(user) {
 			return user.id == this.grupo.maestro.id;
+		},
+		showContent(comment) {
+			this.contentDialog = true;
+			this.content.url = comment.media.url;
+			this.content.video = comment.media.type == 'video';
+		},
+		mediaType(media) {
+			return media.type == 'video' ? 'ondemand_video' : 'photo'
+		},
+		imageSelected(form) {
+			this.fileDialog.fileData = form.get('data');
 		}
 	}
 }
 </script>
 
-<style>
-	
+<style <style lang="scss" scoped>
+	.iframe-container {
+		position: relative;
+		width: 100%;
+		padding-bottom: 56.25%;
+		height: 0;
+		iframe {
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+		}
+	}
 </style>
+	
+

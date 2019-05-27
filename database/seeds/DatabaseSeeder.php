@@ -20,5 +20,6 @@ class DatabaseSeeder extends Seeder
         $this->call(ModulosTableSeeder::class);
         $this->call(GruposTableSeeder::class);
         $this->call(InscripcionesTableSeeder::class);
+        $this->call(TiposMediaTableSeeder::class);
     }
 }

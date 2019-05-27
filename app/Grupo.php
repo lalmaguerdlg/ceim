@@ -34,5 +34,9 @@ class Grupo extends Model
         return $this->hasManyThrough(\App\User::class, \App\Inscripcion::class, 'grupo_id', 'id', 'id', 'user_id');
     }
 
+    public function comentarios() {
+        return $this->hasMany(\App\Comentario::class);
+    }
+
 }
 
