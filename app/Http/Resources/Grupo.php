@@ -33,6 +33,9 @@ class Grupo extends JsonResource
             'alumnos' => $this->whenLoaded('alumnos', function() { 
                 return UserResource::collection($this->alumnos); 
             }),
+            // 'comentarios' => $this->whenLoaded('comentarios', function() {
+            //     return Comentario::collection($this->comentarios);
+            // })
         ];
     }
 }

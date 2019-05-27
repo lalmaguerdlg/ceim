@@ -48,6 +48,7 @@ Route::group(['middleware' => 'auth:api'], function()
 {
     Route::apiResource('maestro/grupo', 'API\MaestroGrupoController')->only(['index', 'show']);
     Route::apiResource('alumno/grupo', 'API\AlumnoGrupoController')->only(['index', 'show']);
+    Route::apiResource('alumno/grupo.comentario', 'API\ComentarioGrupoController')->only(['index', 'store']);
 });
 
 Route::apiResource('inscripcion', 'API\InscripcionController');

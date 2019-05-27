@@ -17,8 +17,9 @@ class CreateAdjuntosTable extends Migration
             $table->bigIncrements('id');
             $table->string('url');
             $table->string('nombre')->nullable();
-            $table->string('tipo_media');
+            $table->string('tipo_media_id');
             $table->bigInteger('comentario_id')->nullable();
+            $table->timestamps();
         });
     }
 

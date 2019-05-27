@@ -10,9 +10,16 @@ export function authHeader() {
     }
 }
 
-export function contentHeaders() {
+export function apiContentHeaders() {
     return { 
         'Content-Type': 'application/json',
+        'Accept': 'application/json',
+    }
+}
+
+export function fileUploadHeaders() {
+    return { 
+        'Content-Type': 'multipart/form-data',
         'Accept': 'application/json',
     }
 }

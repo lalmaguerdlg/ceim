@@ -10,11 +10,15 @@ class Comentario extends Model
     protected $table = 'comentarios';
 
     protected $fillable = [
-        'author_id', 'mensaje', 'grupo_id'
+        'autor_id', 'mensaje', 'grupo_id'
+    ];
+
+    protected $casts = [
+        'grupo_id' => 'int'
     ];
 
     public function autor() {
-        return $this->belongsTo(\App\User::class, 'author_id');
+        return $this->belongsTo(\App\User::class, 'autor_id');
     }
 
     public function adjuntos() {

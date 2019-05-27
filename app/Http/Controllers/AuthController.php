@@ -124,9 +124,10 @@ class AuthController extends Controller
     {
         //$this->guard()->logout();
 
-        auth()->user()->tokens->each(function ($token, $key) {
-            $token->revoke();
-        });
+        // auth()->user()->tokens->each(function ($token, $key) {
+        //     $token->revoke();
+        // });
+        auth()->user()->token()->revoke();
 
         return response()->json('Logged out successfully', 200);
     }

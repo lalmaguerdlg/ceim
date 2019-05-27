@@ -1,7 +1,7 @@
 <template>
 	<v-container >
 	<div class="grupo">
-		<v-card v-if="!isLoading">
+		<v-card v-if="!grupo_loading">
 			<v-img height="125" :src="grupo.curso.portada.url" class="white--text">
 				<v-container fill-height fluid>
 					<v-layout fill-height align-end>
@@ -78,21 +78,28 @@
 						</v-list>
 					</v-tab-item>
 					<v-tab-item :value="'tabs-mensajes'">
-						<v-form class="mb-0">
+						<v-form @submit.prevent="sendMessage" class="mb-0">
 							<v-container>
 								<v-layout row wrap>
 									<v-flex xs12>
 										<v-text-field
+											name="message"
 											v-model="message"
 											:prepend-icon="fileDialog.radios == 'video' ? 'ondemand_video' : 'photo'"
 											append-outer-icon="send"
 											box
+											v-validate.disable="'required|max:255'"
+											:error-messages="errors.collect('message')"
+											data-vv-name="message"
 											clear-icon="close"
 											clearable
 											label="Deja un mensaje"
 											type="text"
+											counter
+											maxlength="255"
 											@click:append-outer="sendMessage"
 											@click:prepend="fileDialog.show = !fileDialog.show"
+											required
 										></v-text-field>
 										<v-dialog v-model="fileDialog.show">
 											<v-card>
@@ -104,10 +111,10 @@
 														prepend-icon="link"
 														clear-icon="close"
 														clearable
-														label="Url del video"
+														label="Url de youtube"
 														type="text"
 														v-model="fileDialog.url"
-														></v-text-field>							
+														></v-text-field>
 													<file-select v-else 
 														label="Porfavor selecciona una imagen"
 														accept=".jpg,.png,.jpeg"
@@ -129,44 +136,53 @@
 								</v-layout>
 							</v-container>
 						</v-form>
-						<v-timeline  dense class="mt-0">
-							<v-timeline-item v-for="comment of comments" :key="`comment-${comment.id}`"
-								:color="isTeacher(comment.user) ? 'pink' : 'teal'" 
-								small
-								class="my-1">
-								<template v-slot:icon v-if="$vuetify.breakpoint.xs">
-									<v-avatar size="40" ><img :src="comment.user.avatar.url" alt="avatar"></v-avatar>
-								</template>
-								<v-card>
-									<v-card-text>
-										<v-layout align-center>
-											<v-flex sm1 v-if="$vuetify.breakpoint.smAndUp">
-												<v-tooltip bottom>
-													<template v-slot:activator="{ on }">
-														<v-avatar size="40" v-on="on"><img :src="comment.user.avatar.url" alt="avatar"></v-avatar>
-													</template>
-													<span>{{comment.user.name}}</span>
-												</v-tooltip>
-											</v-flex>
-											<v-flex xs12 sm10>
-												<div class="caption">{{comment.message}}</div>
-												<v-btn flat icon v-if="comment.media" @click="showContent(comment)"><v-icon>{{mediaType(comment.media)}}</v-icon></v-btn>		
-											</v-flex>
-										</v-layout>
-	
-									</v-card-text>
-								</v-card>
-							</v-timeline-item>
+						<v-container fluid class="py-0">
+							<v-switch v-model="soloMaestro" label="Mensajes del maestro"></v-switch>
+						</v-container>
+						<v-timeline v-if="!comentarios_loading"  dense class="mt-0">
+							<v-slide-y-transition group hide-on-leave>
+								<v-timeline-item v-for="comment of comments" :key="`comment-${comment.id}`"
+									:color="isTeacher(comment.autor) ? 'pink' : 'teal'" 
+									small
+									class="my-1">
+									<template v-slot:icon v-if="$vuetify.breakpoint.xs">
+										<v-avatar size="40" ><img :src="comment.autor.avatar.url" alt="avatar"></v-avatar>
+									</template>
+									<v-card>
+										<v-card-text>
+											<v-layout align-center wrap>
+												<v-flex sm1 v-if="$vuetify.breakpoint.smAndUp">
+													<v-tooltip bottom>
+														<template v-slot:activator="{ on }">
+															<router-link :to="`/usuario/${grupo.maestro.id}`">
+																<v-avatar size="40" v-on="on"><img :src="comment.autor.avatar.url" alt="avatar"></v-avatar>
+															</router-link>
+														</template>
+														<span>{{comment.autor.name}}</span>
+													</v-tooltip>
+												</v-flex>
+												<v-flex xs12 sm10>
+													<div class="caption">{{comment.mensaje}}</div>
+													<!-- <v-btn flat icon v-if="comment.media" @click="showContent(comment)"><v-icon>{{mediaType(comment.media)}}</v-icon></v-btn>		 -->
+												</v-flex>
+												<v-flex xs12 sm1>
+													<span class="caption font-weight-thin grey--text lighten-1">{{formatDate(comment.updated_at)}}</span>
+												</v-flex>
+											</v-layout>
+										</v-card-text>
+									</v-card>
+								</v-timeline-item>	
+							</v-slide-y-transition>
       					</v-timeline>
 					</v-tab-item>
 				</v-tabs-items>
 			</v-card-text>
 		</v-card>
 		<v-dialog v-model="contentDialog" max-width="700">
-				<div v-if="content.video" class="iframe-container">
-					<iframe width="560" height="315" frameborder="0" :src="content.url"></iframe>
-				</div>
-				<v-img v-else :src="content.url"></v-img>
+			<div v-if="content.video" class="iframe-container">
+				<iframe width="560" height="315" frameborder="0" :src="content.url"></iframe>
+			</div>
+			<v-img v-else :src="content.url"></v-img>
 		</v-dialog>
 	</div>
 	</v-container>
@@ -191,6 +207,9 @@ function validateYoutubeUrl(url) {
 }
 
 export default {
+	$_veeValidate: {
+		validator: 'new'
+	},
 	components: {
 		FileSelect
 	},
@@ -198,12 +217,6 @@ export default {
 		return {
 			tabs: 'tabs-mensajes',
 			message: "",
-			comments: [
-				{"id": 1, "message": "This is a commented text", media: { url: 'https://www.youtube.com/embed/e0Meo8ablI8', type: 'video'},"user": {id: 1, name: "Luis Adrian Almaguer de la Garza", avatar: { url: "http://localhost:8000/images/placeholder.jpg"}} },
-				{"id": 2, "message": "This is a commented text", media: { url: 'https://www.w3schools.com/w3images/fjords.jpg', type: 'image'}, "user": {id: 2, name: "Max", avatar: { url: "https://avataaars.io/?avatarStyle=Circle&topType=LongHairFrida&accessoriesType=Kurt&hairColor=Red&facialHairType=BeardLight&facialHairColor=BrownDark&clotheType=GraphicShirt&clotheColor=Gray01&graphicType=Skull&eyeType=Wink&eyebrowType=RaisedExcitedNatural&mouthType=Disbelief&skinColor=Brown"}} },
-				{"id": 3, "message": "This is a commented text", media: { url: 'https://www.youtube.com/embed/74O6cGGGxeA', type: 'video'}, "user": {id: 2, name: "Max", avatar: { url: "https://avataaars.io/?avatarStyle=Circle&topType=LongHairFrida&accessoriesType=Kurt&hairColor=Red&facialHairType=BeardLight&facialHairColor=BrownDark&clotheType=GraphicShirt&clotheColor=Gray01&graphicType=Skull&eyeType=Wink&eyebrowType=RaisedExcitedNatural&mouthType=Disbelief&skinColor=Brown"}} },
-				{"id": 4, "message": "This is a commented text", media: { url: 'https://www.ostraining.com/cdn/images/coding/responsivevideos_1.jpg', type: 'image'}, "user": {id: 3, name: "Mark", avatar: { url: "https://avataaars.io/?avatarStyle=Circle&topType=NoHair&accessoriesType=Blank&facialHairType=MoustacheFancy&facialHairColor=BrownDark&clotheType=ShirtScoopNeck&clotheColor=Blue02&eyeType=Side&eyebrowType=SadConcernedNatural&mouthType=ScreamOpen&skinColor=Yellow"}} },
-			],
 			contentDialog: false,
 			content: { 
 				url: '',
@@ -215,23 +228,40 @@ export default {
 				fileData: null,
 				url: ''
 			},
+			dictionary: {
+				attributes: {
+					message: 'Mensaje a enviar',
+				},
+				custom: {
+					message: {
+						required: 'El mensaje no puede estar vacío',
+						max: 'El mensaje no puede contener mas de 255 caracteres',
+					},
+				}
+			},
+			soloMaestro: false
 		}
 	},
 	computed: {
 		id() {
 			return this.$route.params.id;
 		},
-		...mapGetters('alumno', ['grupoDetalle', 'isLoading']),
-		grupo() {
-			return this.grupoDetalle;
+		...mapGetters('grupo', ['grupo', 'grupo_loading', 'comentarios', 'comentarios_loading']),
+		comments() {
+			return this.soloMaestro ?  this.comentarios.filter(c => this.isTeacher(c.autor)) : this.comentarios;
 		}
 	},
+	mounted() {
+		this.$validator.localize('es', this.dictionary);
+	},
 	created() {
-		this.fetchGrupoDetails(this.id);
+		this.fetchGrupo(this.id);
 	},
 	methods: {
-		...mapActions('alumno', ['fetchGrupoDetails']),
-		sendMessage() {
+		...mapActions('grupo', ['fetchGrupo', 'fetchComentarios', 'postComentario']),
+		async sendMessage() {
+			let valid = await this.$validator.validateAll();
+			if(!valid) return;
 			let hasFile = false;
 			let embed = '';
 			if(this.fileDialog.radios == 'video' && this.fileDialog.url != '') {
@@ -243,11 +273,22 @@ export default {
 				hasFile = true;
 			}
 
-			console.log(this.message, hasFile ? this.fileDialog.radios == 'video' ? embed : this.fileDialog.fileData : '');
-			this.message = "";
+			let comentario_data = new FormData();
+			comentario_data.append('mensaje', this.message);
+			console.log(comentario_data);
+			this.postComentario({ grupo_id: this.id, comentario_data})
+				.then(_ => {
+					this.message = "";
+				})
+				.catch(e => {
+					if(e && e.errors.mensaje) {
+						e.errors.mensaje.forEach(v => this.errors.add({ field: 'message', msg: v}));
+					}
+				});
+			// console.log(this.message, hasFile ? this.fileDialog.radios == 'video' ? embed : this.fileDialog.fileData : '');
 		},
-		isTeacher(user) {
-			return user.id == this.grupo.maestro.id;
+		isTeacher(autor) {
+			return autor.id == this.grupo.maestro.id;
 		},
 		showContent(comment) {
 			this.contentDialog = true;
@@ -259,6 +300,43 @@ export default {
 		},
 		imageSelected(form) {
 			this.fileDialog.fileData = form.get('data');
+		},
+		formatDate(value) {
+			let date = new Date(value);
+			
+			let current = Date.now();
+			
+			var msPerMinute = 60 * 1000;
+			var msPerHour = msPerMinute * 60;
+			var msPerDay = msPerHour * 24;
+			var msPerMonth = msPerDay * 30;
+			var msPerYear = msPerDay * 365;
+			
+			var elapsed = current - date;
+			
+			if (elapsed < msPerMinute) {
+				return Math.round(elapsed/1000) + ' seg';   
+			}
+			
+			else if (elapsed < msPerHour) {
+				return Math.round(elapsed/msPerMinute) + ' min';   
+			}
+			
+			else if (elapsed < msPerDay ) {
+				return Math.round(elapsed/msPerHour ) + ' h';   
+			}
+
+			else if (elapsed < msPerMonth) {
+				return Math.round(elapsed/msPerDay) + ' d';   
+			}
+			
+			else if (elapsed < msPerYear) {
+				return Math.round(elapsed/msPerMonth) + ' m ';   
+			}
+			
+			else {
+				return Math.round(elapsed/msPerYear ) + ' a ';   
+			}
 		}
 	}
 }

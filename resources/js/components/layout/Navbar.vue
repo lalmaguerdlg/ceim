@@ -98,11 +98,11 @@ export default {
 			mini: true,
 			links: [
 				{ icon: 'library_books', text: 'Cursos', route: '/'},
-				{ icon: 'payment', text: 'Pagos', route: '/pagos'},
+				// { icon: 'payment', text: 'Pagos', route: '/pagos'},
 				{ icon: 'email', text: 'Mensajes', route: '/mensajes'},
 			],
 			bottomLinks: [
-				{ icon: 'help', text: 'Ayuda', route: '/ayuda'},
+				// { icon: 'help', text: 'Ayuda', route: '/ayuda'},
 			],
 			snackbar: false,
 		}

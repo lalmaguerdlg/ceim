@@ -12,5 +12,9 @@ class TipoMedia extends Model
         'id', 'descripcion', 'controlado'
     ];
 
+    protected $casts = [
+        'controlado' => 'boolean'
+    ];
+
     public $incrementing = false;
 }

@@ -44,6 +44,17 @@ class User extends Authenticatable
         return $this->where('email', $username)->first();
     }
 
+    public function hasRole($roles) {
+        $rol = null;
+        if(is_array($roles)) {
+            $rol = $this->roles()->whereIn('rol', $roles)->first();
+        }
+        else {
+            $rol = $this->roles()->where('rol', $roles)->first();
+        }
+        return $rol != null;
+    }
+
     public function roles() {
         return $this->belongsToMany('\App\Auth\Rol')->withTimestamps();
     }
@@ -64,8 +75,20 @@ class User extends Authenticatable
         return $this->hasManyThrough(\App\Grupo::class, \App\Inscripcion::class, 'user_id', 'id', 'id', 'grupo_id');
     }
 
+    public function grupos() {
+        // ESTO ES UN FIX TEMPORAL
+        $grupos_relation = null;
+        if( $this->hasRole(['maestro', 'admin']) ) {
+            $grupos_relation = $this->imparte_grupos();
+        }
+        else {
+            $grupos_relation = $this->grupos_inscritos();
+        }
+        return $grupos_relation;
+    }
+
     public function comentarios_realizados() {
-        return $this->hasMany(\App\Comentario::class, 'author_id');
+        return $this->hasMany(\App\Comentario::class, 'autor_id');
     }
 
 }

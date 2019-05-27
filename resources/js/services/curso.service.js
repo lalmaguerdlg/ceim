@@ -1,13 +1,13 @@
 import config from '../helpers/config'
 import axios from 'axios'
-import { contentHeaders, authHeader } from '../helpers/request-headers';
+import { apiContentHeaders, authHeader } from '../helpers/request-headers';
 import { unauthorizedHandler, getDataHandler } from './handlers';
 
 
 function requestConfig() {
 	return {
 		baseUrl: config.apiUrl,
-		headers: { ...contentHeaders(), ...authHeader() }
+		headers: { ...apiContentHeaders(), ...authHeader() }
 	};
 }
 

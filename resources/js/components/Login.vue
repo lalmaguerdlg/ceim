@@ -11,11 +11,11 @@
               <v-card-text class="pa-5 pb-0">
                 <v-form @submit.prevent="submit" id="login-form">
                   <v-text-field prepend-icon="person" id="email" name="email" label="Email" type="text"
-				  	v-model="email"
-				  	v-validate="'required|email'"
-					:error-messages="errors.collect('email')"
-					data-vv-name="email"
-					required></v-text-field>
+										v-model="email"
+										v-validate="'required|email'"
+										:error-messages="errors.collect('email')"
+										data-vv-name="email"
+										required></v-text-field>
                   <v-text-field prepend-icon="lock" id="password" name="password" label="Contraseña" type="password"
 				  	v-model="password"
 				  	v-validate="'required'"

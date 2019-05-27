@@ -37,7 +37,7 @@ export default {
 		}
 	},
 	computed: {
-		...mapGetters('alumno', ['grupos', 'isLoading'])
+		...mapGetters('alumno', ['grupos', 'grupos_loading'])
 	},
 	created() {
 		if(this.grupos.length == 0)
