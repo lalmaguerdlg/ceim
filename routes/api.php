@@ -23,7 +23,6 @@ Route::group(['middleware' => ['auth:api']], function () {
 
     Route::post('/logout', 'AuthController@logout');
 
-    /*
     Route::get('/user', function (Request $request) {
         return $request->user();
     });
@@ -37,7 +36,6 @@ Route::group(['middleware' => ['auth:api']], function () {
         $user = $request->user();       
         return $user->scopes;
     });
-    */
 
 });
 
@@ -64,12 +62,11 @@ Route::apiResource('imagen', 'API\ImagenController')->only([
     'index', 'show'
 ]);
 
-/*
 Route::get('/test', function(Request $request) {
     $user = \App\User::where('email', 'admin@admin.com')->first();
     return $user->isAllowed('cursos-teach') ? 'El usuario tiene permitido enseñar' : 'El usuario no tiene permitido enseñar';
 });
-*/
+
 
 Route::fallback(function(){
     return response()->json(['message' => 'Not found.'], 404);
