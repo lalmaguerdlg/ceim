@@ -21,9 +21,7 @@ class CursoGrupoController extends Controller
      */
     public function index($curso_id)
     {
-        $curso = Curso::with('grupos')->find($curso_id);
-        if(!$curso) 
-            throw new ModelNotFoundException();
+        $curso = Curso::with('grupos')->findOrFail($curso_id);
         
         $grupos = $curso->grupos()->with('maestro.avatar')->withCount('inscripciones')->get();
         return GrupoResource::collection($grupos);
@@ -44,9 +42,7 @@ class CursoGrupoController extends Controller
             'capacidad' => 'required|integer',
         ]);
 
-        $curso = Curso::find($curso_id);
-        if(!$curso) 
-            throw new ModelNotFoundException();
+        $curso = Curso::findOrFail($curso_id);
 
         $mapped = remap_keys($data, ['maestro' => 'maestro_id']);
 
@@ -72,10 +68,7 @@ class CursoGrupoController extends Controller
      */
     public function show($curso_id, $grupo_id)
     {
-        $grupo = Grupo::with('curso')->withCount('inscripciones')->where(['curso_id' => $curso_id, 'id' => $grupo_id])->first();
-        if(!$grupo) 
-            throw new ModelNotFoundException();
-        
+        $grupo = Grupo::with('curso')->withCount('inscripciones')->where(['curso_id' => $curso_id, 'id' => $grupo_id])->firstOrFail();
         return GrupoResource::make($grupo);
     }
 
@@ -95,9 +88,7 @@ class CursoGrupoController extends Controller
             'capacidad' => 'integer',
         ]);
 
-        $grupo = Grupo::with('curso')->withCount('inscripciones')->where(['curso_id' => $curso_id, 'id' => $grupo_id])->first();
-        if(!$grupo) 
-            throw new ModelNotFoundException();
+        $grupo = Grupo::with('curso')->withCount('inscripciones')->where(['curso_id' => $curso_id, 'id' => $grupo_id])->firstOrFail();
 
         $mapped = remap_keys($data, ['maestro' => 'maestro_id']);
 
@@ -122,9 +113,7 @@ class CursoGrupoController extends Controller
      */
     public function destroy($curso_id, $grupo_id)
     {
-        $grupo = Grupo::where(['curso_id' => $curso_id, 'id' => $grupo_id])->first();
-        if(!$grupo) 
-            throw new ModelNotFoundException();
+        $grupo = Grupo::where(['curso_id' => $curso_id, 'id' => $grupo_id])->firstOrFail();
         $grupo->delete();
         return response()->json(['message' => 'ok']);
     }

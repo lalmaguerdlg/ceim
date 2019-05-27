@@ -18,9 +18,6 @@ class MaterialController extends Controller
     public function index($curso_id, $modulo_id)
     {
         $modulo = ModuloController::get_modulo($curso_id, $modulo_id);
-        if(!$modulo) {
-            throw new ModelNotFoundException();
-        }
         return MaterialResource::collection($modulo->materiales);
     }
 
@@ -43,9 +40,6 @@ class MaterialController extends Controller
             if($material){
                 $errors['nombre'][] = 'El modulo ya tiene un material con este nombre.';
             }
-        } 
-        else {
-            throw new ModelNotFoundException();
         }
 
         if(count($errors) > 0) {
@@ -67,10 +61,7 @@ class MaterialController extends Controller
     {
         $material = Material::whereHas('modulo', function ($q) use ($curso_id, $modulo_id) {
             $q->where([ 'id' => $modulo_id, 'curso_id' => $curso_id]);
-        })->where('id', $material_id)->first();
-        if(!$material) {
-            throw new ModelNotFoundException();
-        }
+        })->where('id', $material_id)->firstOrFail();
         return MaterialResource::make($material);
     }
 
@@ -120,10 +111,7 @@ class MaterialController extends Controller
     {
         $material = Material::whereHas('modulo', function ($q) use ($curso_id, $modulo_id) {
             $q->where([ 'id' => $modulo_id, 'curso_id' => $curso_id]);
-        })->where('id', $material_id)->first();
-        if(!$material) {
-            throw new ModelNotFoundException();
-        }
+        })->where('id', $material_id)->firstOrFail();
         $material->delete();
         return response()->json([ 'message' => 'ok' ]);
     }

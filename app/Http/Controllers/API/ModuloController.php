@@ -37,14 +37,12 @@ class ModuloController extends Controller
             'descripcion' => 'required',
         ]);
 
-        $curso = Curso::with('modulos')->find($curso_id);
+        $curso = Curso::with('modulos')->findOrFail($curso_id);
         if($curso){
             $modulo = $curso->modulos()->whereRaw("upper(`nombre`) LIKE '%". strtoupper($data['nombre']). "%'")->first();
             if($modulo) {
                 $errors['nombre'][] = 'El curso ya contiene un modulo con este nombre.';
             }
-        } else {
-            throw new ModelNotFoundException();
         }
 
         if(count($errors) > 0) {
@@ -66,11 +64,6 @@ class ModuloController extends Controller
     public function show($curso_id, $modulo_id)
     {
         $modulo = $this->get_modulo($curso_id, $modulo_id);
-
-        if(!$modulo) {
-            throw new ModelNotFoundException();
-        }
-
         return ModuloResource::make($modulo);
     }
 
@@ -89,14 +82,12 @@ class ModuloController extends Controller
             'descripcion' => 'required',
         ]);
 
-        $curso = Curso::with('modulos')->find($curso_id);
+        $curso = Curso::with('modulos')->findOrFail($curso_id);
         if($curso) {
             $modulo = $curso->modulos()->where('id', '!=', $modulo_id)->whereRaw("upper(`nombre`) LIKE '%". strtoupper($data['nombre']). "%'")->first();
             if($modulo) {
                 $errors['nombre'][] = 'El curso ya contiene un modulo con este nombre.';
             }
-        } else {
-            throw new ModelNotFoundException();
         }
 
         if(count($errors) > 0) {
@@ -105,9 +96,6 @@ class ModuloController extends Controller
 
 
         $modulo = $this->get_modulo($curso_id, $modulo_id);
-        if(!$modulo) {
-            throw new ModelNotFoundException();
-        }
 
         $modulo->fill($data);
         $modulo->save();
@@ -123,9 +111,6 @@ class ModuloController extends Controller
     public function destroy($curso_id, $modulo_id)
     {
         $modulo = $this->get_modulo($curso_id, $modulo_id);
-        if(!$modulo) {
-            throw new ModelNotFoundException();
-        }
         $modulo->delete();
         return response()->json(['message' => 'ok']);
     }
@@ -134,6 +119,6 @@ class ModuloController extends Controller
         return Modulo::where([
             'curso_id' => $curso_id, 
             'id' => $modulo_id
-        ])->first();
+        ])->firstOrFail();
     }
 }
