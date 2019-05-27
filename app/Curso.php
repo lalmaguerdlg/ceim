@@ -18,7 +18,7 @@ class Curso extends Model
         return $this->belongsTo(Imagen::class)->withDefault([
             'id' => 0,
             'tag' => 'default',
-            'url' => asset('public/images/placeholder.jpg')
+            'url' => asset('images/placeholder.jpg')
         ]);
     }
 
