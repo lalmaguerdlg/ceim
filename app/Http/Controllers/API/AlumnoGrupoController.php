@@ -50,7 +50,7 @@ class AlumnoGrupoController extends Controller
     public function show(Request $request, $grupo_id)
     {
         $user = $request->user();
-        $user->grupos()->with(
+        $grupo = $user->grupos()->with(
             'alumnos.avatar', 
             'maestro.avatar',
             'curso.portada', 

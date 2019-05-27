@@ -13,12 +13,13 @@ class TiposMediaTableSeeder extends Seeder
      */
     public function run()
     {
+        DB::table('tipos_media')->delete();
         $tiposMedia = [
-            ['id' => 'image', 'descripcion' => 'Imagen en host externo', 'controlado' => false],
-            ['id' => 'image-managed', 'descripcion' => 'Imagen en host interno', 'controlado' => true],
-            ['id' => 'video', 'descripcion' => 'Video en host externo', 'controlado' => false],
-            ['id' => 'video-managed', 'descripcion' => 'Video en host interno', 'controlado' => true],
-            ['id' => 'file', 'descripcion' => 'Archivo en host interno', 'controlado' => true],
+            ['id' => 'image', 'descripcion' => 'Imagen', 'controlado' => true],
+            ['id' => 'image-url', 'descripcion' => 'Imagen en host externo', 'controlado' => false],
+            ['id' => 'video', 'descripcion' => 'Video', 'controlado' => true],
+            ['id' => 'video-url', 'descripcion' => 'Video en host externo', 'controlado' => false],
+            ['id' => 'file', 'descripcion' => 'Archivo', 'controlado' => true],
         ];
         TipoMedia::insert($tiposMedia);
     }

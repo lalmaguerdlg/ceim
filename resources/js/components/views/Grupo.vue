@@ -81,11 +81,15 @@
 						<v-form @submit.prevent="sendMessage" class="mb-0">
 							<v-container>
 								<v-layout row wrap>
-									<v-flex xs12>
-										<v-text-field
+									<v-flex xs12 class="text-xs-center">
+										<v-progress-circular v-if="comentario_uploading"
+											indeterminate
+											color="primary"
+											></v-progress-circular>
+										<v-text-field v-else
 											name="message"
 											v-model="message"
-											:prepend-icon="fileDialog.radios == 'video' ? 'ondemand_video' : 'photo'"
+											:prepend-icon="fileDialog.radios == 'youtube' ? 'ondemand_video' : 'photo'"
 											append-outer-icon="send"
 											box
 											v-validate.disable="'required|max:255'"
@@ -107,7 +111,7 @@
 												<v-divider></v-divider>
 												<v-card-text>
 													<v-container>
-													<v-text-field v-if="fileDialog.radios == 'video'"
+													<v-text-field v-if="fileDialog.radios == 'youtube'"
 														prepend-icon="link"
 														clear-icon="close"
 														clearable
@@ -120,7 +124,7 @@
 														accept=".jpg,.png,.jpeg"
 														v-on:formData="imageSelected"></file-select>
 													<v-radio-group v-model="fileDialog.radios" row>
-														<v-radio label="Video" value="video"></v-radio>
+														<v-radio label="Video" value="youtube"></v-radio>
 														<v-radio label="Imagen" value="image"></v-radio>
 													</v-radio-group>
 													</v-container>
@@ -163,7 +167,8 @@
 												</v-flex>
 												<v-flex xs12 sm10>
 													<div class="caption">{{comment.mensaje}}</div>
-													<!-- <v-btn flat icon v-if="comment.media" @click="showContent(comment)"><v-icon>{{mediaType(comment.media)}}</v-icon></v-btn>		 -->
+													<v-btn v-for="adjunto of comment.adjuntos" :key="`adjunto-${adjunto.id}`"
+													flat icon @click="showContent(adjunto)"><v-icon>{{mediaType(adjunto)}}</v-icon></v-btn>		
 												</v-flex>
 												<v-flex xs12 sm1>
 													<span class="caption font-weight-thin grey--text lighten-1">{{formatDate(comment.updated_at)}}</span>
@@ -178,11 +183,14 @@
 				</v-tabs-items>
 			</v-card-text>
 		</v-card>
-		<v-dialog v-model="contentDialog" max-width="700">
+		<v-dialog v-model="contentDialog" max-width="700" class="content-viewer">
 			<div v-if="content.video" class="iframe-container">
 				<iframe width="560" height="315" frameborder="0" :src="content.url"></iframe>
 			</div>
-			<v-img v-else :src="content.url"></v-img>
+			<!-- <div v-else class="img-container">
+				<img :src="content.url">
+			</div> -->
+			<v-img v-else :src="content.url" alt="Test"></v-img>
 		</v-dialog>
 	</div>
 	</v-container>
@@ -224,7 +232,7 @@ export default {
 			},
 			fileDialog: {
 				show: false,
-				radios: 'video',
+				radios: 'youtube',
 				fileData: null,
 				url: ''
 			},
@@ -246,7 +254,7 @@ export default {
 		id() {
 			return this.$route.params.id;
 		},
-		...mapGetters('grupo', ['grupo', 'grupo_loading', 'comentarios', 'comentarios_loading']),
+		...mapGetters('grupo', ['grupo', 'grupo_loading', 'comentarios', 'comentarios_loading', 'comentario_uploading']),
 		comments() {
 			return this.soloMaestro ?  this.comentarios.filter(c => this.isTeacher(c.autor)) : this.comentarios;
 		}
@@ -262,41 +270,48 @@ export default {
 		async sendMessage() {
 			let valid = await this.$validator.validateAll();
 			if(!valid) return;
-			let hasFile = false;
-			let embed = '';
-			if(this.fileDialog.radios == 'video' && this.fileDialog.url != '') {
-				embed = validateYoutubeUrl(this.fileDialog.url)
-				if(embed != '')
-					hasFile = true;
+			let hasAttachment = false;
+			let attachment_type = this.fileDialog.radios;
+			let attachment = '';
+			if(attachment_type == 'youtube' && this.fileDialog.url != '') {
+				attachment = validateYoutubeUrl(this.fileDialog.url)
+				if(attachment != '')
+					hasAttachment = true;
 			}
-			else if(this.fileDialog.radios == 'image' && this.fileDialog.fileData != null) {
-				hasFile = true;
+			else if(attachment_type == 'image' && this.fileDialog.fileData != null) {
+				attachment = this.fileDialog.fileData;
+				hasAttachment = true;
 			}
+
 
 			let comentario_data = new FormData();
 			comentario_data.append('mensaje', this.message);
-			console.log(comentario_data);
+			if(hasAttachment) {
+				comentario_data.append('adjunto', attachment);
+				comentario_data.append('tipo_adjunto', attachment_type);
+			}
 			this.postComentario({ grupo_id: this.id, comentario_data})
 				.then(_ => {
 					this.message = "";
+					this.fileDialog.fileData = null;
+					this.fileDialog.url = '';
 				})
 				.catch(e => {
 					if(e && e.errors.mensaje) {
 						e.errors.mensaje.forEach(v => this.errors.add({ field: 'message', msg: v}));
 					}
 				});
-			// console.log(this.message, hasFile ? this.fileDialog.radios == 'video' ? embed : this.fileDialog.fileData : '');
 		},
 		isTeacher(autor) {
 			return autor.id == this.grupo.maestro.id;
 		},
-		showContent(comment) {
+		showContent(adjunto) {
 			this.contentDialog = true;
-			this.content.url = comment.media.url;
-			this.content.video = comment.media.type == 'video';
+			this.content.url = adjunto.url;
+			this.content.video = adjunto.tipo == 'video-url';
 		},
-		mediaType(media) {
-			return media.type == 'video' ? 'ondemand_video' : 'photo'
+		mediaType(adjunto) {
+			return adjunto.tipo == 'video-url' ? 'ondemand_video' : 'photo'
 		},
 		imageSelected(form) {
 			this.fileDialog.fileData = form.get('data');
@@ -349,6 +364,20 @@ export default {
 		padding-bottom: 56.25%;
 		height: 0;
 		iframe {
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+		}
+	}
+
+	.img-container {
+		position: relative;
+		width: 100%;
+		padding-bottom: 56.25%;
+		// height: 0;
+		img {
 			position: absolute;
 			top: 0;
 			left: 0;

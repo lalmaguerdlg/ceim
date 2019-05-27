@@ -18,6 +18,6 @@ class TipoMedia extends JsonResource
             'id' => $this->id,
             'descripcion' => $this->descripcion, 
             'controlado' => $this->controlado
-        ]
+        ];
     }
 }

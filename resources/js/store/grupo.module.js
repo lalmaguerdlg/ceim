@@ -5,6 +5,7 @@ const state = {
 	grupo: null,
 	comentarios: {
 		loading: false,
+		uploading: false,
 		all: []
 	},
 	error: null
@@ -22,6 +23,9 @@ const getters = {
 	},
 	comentarios_loading(state) {
 		return state.comentarios.loading;
+	},
+	comentario_uploading(state) {
+		return state.comentarios.uploading;
 	},
 	error(state) {
 		return state.error;
@@ -51,11 +55,13 @@ const actions = {
 		}
 	},
 	async postComentario({commit}, {grupo_id, comentario_data}) {
+		commit('POST_COMENTARIO')
 		try {
 			let comentario = await grupoService.postComentario(grupo_id, comentario_data);
-			commit('POST_COMENTARIO', comentario.data);
+			commit('POST_COMENTARIO_SUCCESS', comentario.data);
 		}
 		catch(error) {
+			commit('POST_COMENTARIO_ERROR', error);
 			return Promise.reject(error);
 		}
 	}
@@ -88,10 +94,16 @@ const mutations = {
 		state.comentarios.all = [];
 		state.error = error;
 	},
-	POST_COMENTARIO(state, comentario) {
+	POST_COMENTARIO(state) {
+		state.comentarios.uploading = true;
+	},
+	POST_COMENTARIO_SUCCESS(state, comentario) {
+		state.comentarios.uploading = false;
 		state.comentarios.all.unshift(comentario);
+		state.error = null;
 	},
 	POST_COMENTARIO_ERROR(state, error) {
+		state.comentarios.uploading = false;
 		state.error = error;
 	}
 }
