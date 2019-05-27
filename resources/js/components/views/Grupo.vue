@@ -46,12 +46,12 @@
 								</template>
 								<v-card>
 									<v-card-text>{{modulo.descripcion}} </v-card-text>
-									<v-card-actions>
+									<!-- <v-card-actions>
 										<v-spacer></v-spacer>
 										<v-btn flat color="primary" :to="`/grupo/${id}/modulo/${modulo.id}`" class="route-link">
 											<v-icon left>arrow_right_alt</v-icon>Ir al modulo 
 										</v-btn>
-									</v-card-actions>
+									</v-card-actions> -->
 								</v-card>
 							</v-expansion-panel-content>
 						</v-expansion-panel>
