@@ -10,6 +10,7 @@ import GruposView from './components/views/Grupos.vue'
 import GrupoView from './components/views/Grupo.vue'
 import ModuloView from './components/views/Modulo.vue'
 import PerfilView from './components/views/Perfil.vue'
+import ChatView from './components/Chat.vue'
 
 /*
 import Login from './views/Login.vue'
@@ -48,6 +49,10 @@ const routes = [
 				path: 'usuario/:id',
 				component: PerfilView,
 			},
+			{
+				path: 'chat',
+				component: ChatView
+			}
 		]
 	},
 ];

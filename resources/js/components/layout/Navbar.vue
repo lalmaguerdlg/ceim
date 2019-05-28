@@ -100,7 +100,7 @@ export default {
 			links: [
 				{ icon: 'library_books', text: 'Cursos', route: '/'},
 				// { icon: 'payment', text: 'Pagos', route: '/pagos'},
-				// { icon: 'email', text: 'Mensajes', route: '/mensajes'},
+				{ icon: 'email', text: 'Mensajes', route: '/chat'},
 			],
 			bottomLinks: [
 				// { icon: 'help', text: 'Ayuda', route: '/ayuda'},
