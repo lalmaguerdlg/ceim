@@ -79,6 +79,7 @@ const actions = {
 }
 
 const mutations = {
+
 	FETCH_GRUPO_DETAILS(state) { 
 		state.loading = true;
 	},

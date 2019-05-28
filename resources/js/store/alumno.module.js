@@ -1,4 +1,5 @@
 import { alumnoService } from '../services'
+import { grupoService } from '../services'
 
 const state = {
 	grupos: {
@@ -18,6 +19,15 @@ const getters = {
 }
 
 const actions = {
+	async createGrupo({commit}, grupo) {
+		try {
+			let nuevo_grupo = await grupoService.createGrupo(grupo);
+			commit('CREATE_GRUPO_SUCCESS', nuevo_grupo.data);
+		}
+		catch(error){
+			return Promise.reject(error);
+		}
+	},
 	async fetchGrupos({commit}) {
 		commit('FETCH_ALL_GRUPOS');
 		try {
@@ -31,6 +41,10 @@ const actions = {
 }
 
 const mutations = {
+	CREATE_GRUPO_SUCCESS(state, grupo) {
+		console.log(grupo);
+		state.grupos.all.push(grupo);
+	},
 	FETCH_ALL_GRUPOS(state) { 
 		state.grupos.loading = true;
 	},

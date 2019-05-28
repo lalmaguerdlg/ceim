@@ -4,6 +4,12 @@ import { unauthorizedHandler, getDataHandler, unprocessableEntityHandler } from 
 
 
 export const grupoService = {
+	createGrupo(grupo) {
+		return axios.post(`/api/curso/1/grupo/`, grupo, config.jsonRequestConfig())
+			.then(getDataHandler)
+			.catch(unauthorizedHandler)
+			.catch(unprocessableEntityHandler)
+	},
 	getGrupoById(id) {
 		return axios.get(`/api/alumno/grupo/${id}`, config.jsonRequestConfig())
 			.then(getDataHandler)

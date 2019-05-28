@@ -57,6 +57,7 @@ class CursoGrupoController extends Controller
         }
         //dd($mapped);
         $grupo = Grupo::create($mapped);
+        $grupo->load('curso.portada', 'curso.unidad_duracion', 'maestro.avatar');
         return GrupoResource::make($grupo);
     }
 
