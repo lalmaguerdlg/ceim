@@ -317,7 +317,7 @@ export default {
 			this.fileDialog.fileData = form.get('data');
 		},
 		formatDate(value) {
-			let date = new Date(value);
+			let date = new Date(value).getTime();
 			
 			let current = Date.now();
 			
