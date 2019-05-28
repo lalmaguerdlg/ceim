@@ -13,11 +13,19 @@ class ImagenesTableSeeder extends Seeder
      */
     public function run()
     {
-        //
-        $imagen = new Imagen([
-            'tag' => 'default',
-            'url' => 'https://carepharmaceuticals.com.au/wp-content/uploads/sites/19/2018/02/placeholder-600x400.png'
-        ]);
-        $imagen->save();
+        $imagenes = [
+            [
+                'tag' => 'default',
+                'url' => asset('images/placeholder.jpg'),
+                'tipo_media_id' => 'image-url'
+            ],
+            [
+                'tag' => 'default-avatar',
+                'url' => asset('images/avatar-placeholder.png'),
+                'tipo_media_id' => 'image-url'
+            ]
+        ];
+
+        Imagen::insert($imagenes);
     }
 }

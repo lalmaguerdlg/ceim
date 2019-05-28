@@ -43,13 +43,13 @@
 				</v-list>
 			</v-toolbar>
 			
-				<v-list class="py-0">
-					<v-list-tile avatar router to="/usuario" class="route-link">
+				<v-list class="py-0" v-if="account">
+					<v-list-tile avatar router :to="`/usuario/${account.id}`" class="route-link">
 						<v-list-tile-avatar>
-							<img src="https://randomuser.me/api/portraits/men/85.jpg">
+							<img :src="account.avatar.url">
 						</v-list-tile-avatar>
 						<v-list-tile-content class="white--text">
-							<v-list-tile-title>John Leider</v-list-tile-title>
+							<v-list-tile-title>{{account.name}}</v-list-tile-title>
 						</v-list-tile-content>
 					</v-list-tile>
 				</v-list>
@@ -90,6 +90,7 @@
 <script>
 
 import { userService } from '../../services'
+import { mapGetters, mapActions } from 'vuex';
 
 export default {
 	data() {
@@ -99,7 +100,7 @@ export default {
 			links: [
 				{ icon: 'library_books', text: 'Cursos', route: '/'},
 				// { icon: 'payment', text: 'Pagos', route: '/pagos'},
-				{ icon: 'email', text: 'Mensajes', route: '/mensajes'},
+				// { icon: 'email', text: 'Mensajes', route: '/mensajes'},
 			],
 			bottomLinks: [
 				// { icon: 'help', text: 'Ayuda', route: '/ayuda'},
@@ -107,10 +108,18 @@ export default {
 			snackbar: false,
 		}
 	},
-
+	computed: {
+		...mapGetters('user', ['account']),
+	},
 	methods: {
+		...mapActions('user', ['fetchUser']),
 		async logout() {
 			let response = await userService.logout();
+		}
+	},
+	created() {
+		if(this.user == null) {
+			this.fetchUser();
 		}
 	}
 }

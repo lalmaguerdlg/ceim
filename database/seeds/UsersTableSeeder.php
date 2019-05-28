@@ -17,7 +17,8 @@ class UsersTableSeeder extends Seeder
         //factory(App\User::class, 1)->create();
         $role = Rol::where('rol', 'admin')->first();
         
-        $default_image = Imagen::where('tag', 'default')->first();
+        $default_portada = Imagen::where('tag', 'default')->first();
+        $default_avatar = Imagen::where('tag', 'default-avatar')->first();
 
         $user = App\User::create([
             'name' => 'admin',
@@ -25,7 +26,8 @@ class UsersTableSeeder extends Seeder
             'email_verified_at' => now(),
             'password' => bcrypt('password'), // password
             'remember_token' => Str::random(10),
-            'avatar_id' => $default_image->id
+            'avatar_id' => $default_avatar->id,
+            'portada_id' => $default_portada->id,
         ]);
         $user->save();
         $user->roles()->attach($role);
@@ -37,7 +39,8 @@ class UsersTableSeeder extends Seeder
             'email_verified_at' => now(),
             'password' => bcrypt('password'), // password
             'remember_token' => Str::random(10),
-            'avatar_id' => $default_image->id
+            'avatar_id' => $default_avatar->id,
+            'portada_id' => $default_portada->id,
         ]);
         $user->save();
         $user->roles()->attach($alumno_role);

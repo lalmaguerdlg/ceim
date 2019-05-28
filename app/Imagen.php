@@ -9,6 +9,10 @@ class Imagen extends Model
     protected $table = 'imagenes';
 
     protected $fillable = [
-        'tag', 'url',
+        'tag', 'url', 'tipo_media_id'
     ];
+
+    public function tipo_media() {
+        return $this->belongsTo(\App\TipoMedia::class);
+    }
 }

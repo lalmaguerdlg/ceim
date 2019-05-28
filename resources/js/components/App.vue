@@ -1,6 +1,6 @@
 <template>
 	<div>
-		<router-view></router-view>
+		<router-view :key="$route.fullPath"></router-view>
 		<!-- <v-app class="grey lighten-4">
 			<navbar/>
 			<v-content class="mx-4 mb-4">

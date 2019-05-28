@@ -17,6 +17,7 @@ class CreateImagenesTable extends Migration
             $table->bigIncrements('id');
             $table->string('tag');
             $table->string('url', 2083);
+            $table->string('tipo_media_id');
             $table->timestamps();
         });
     }

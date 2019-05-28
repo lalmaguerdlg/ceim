@@ -60,7 +60,24 @@ class User extends Authenticatable
     }
 
     public function avatar() {
-        return $this->belongsTo(\App\Imagen::class, 'avatar_id', 'id');
+        return $this->belongsTo(\App\Imagen::class, 'avatar_id', 'id')->withDefault(
+            [
+                'id' => 0,
+                'tag' => 'default-avatar',
+                'url' => asset('images/avatar-placeholder.png')
+            ]
+        );
+    }
+
+    public function portada() {
+        return $this->belongsTo(\App\Imagen::class, 'portada_id', 'id')->withDefault(
+            [
+                'id' => 0,
+                'tag' => 'default',
+                'url' => asset('images/placeholder.jpg'),
+                'tipo_media_id' => 'image-url'
+            ]
+        );
     }
 
     public function imparte_grupos() {

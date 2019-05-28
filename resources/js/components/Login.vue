@@ -29,7 +29,7 @@
               </v-card-text>
               <v-card-actions class="px-5 py-3">
                 <v-spacer></v-spacer>
-                <v-btn type="submit" color="primary" form="login-form">Iniciar sesion</v-btn>
+                <v-btn type="submit" color="primary" form="login-form" :loading="user_loading">Iniciar sesion</v-btn>
               </v-card-actions>
             </v-card>
           </v-flex>
@@ -42,6 +42,7 @@
 <script>
 
 import { userService } from '../services'
+import { mapGetters, mapActions } from 'vuex'
 
 export default {
 	$_veeValidate: {
@@ -68,16 +69,38 @@ export default {
 			}
 		}
 	},
+	computed: {
+		...mapGetters('user', ['user_loading', 'login_errors','logged_in'])
+	},
 	mounted() {
 		this.$validator.localize('es', this.dictionary);
 	},
+	watch: {
+		logged_in(value, old) {
+			if(value) {
+					this.$router.push('/');
+			}
+		},
+		login_errors(errors, old) {
+			if(errors != null){
+				if(e && e.errors.email) {
+					errors.email.forEach(e => {
+						this.errors.add({
+							field: 'email',
+							msg: e
+						});
+					})
+				}
+			}
+		}
+	},
 	methods: {
+		...mapActions('user', ['login']),
 		async submit() {
 			let valid = await this.$validator.validateAll();
 			if(valid) {
 				try {
-					await userService.login(this.email, this.password);
-					this.$router.push('/');
+					await this.login({email: this.email, password: this.password});
 				} catch(e) {
 					if(e && e.errors.email) {
 						this.errors.add({

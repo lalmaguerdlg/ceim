@@ -1,17 +1,15 @@
 import config from '../helpers/config'
 import axios from 'axios'
 
-import { unprocessableEntityHandler, unauthorizedHandler } from './handlers';
+import { unprocessableEntityHandler, unauthorizedHandler, getDataHandler } from './handlers';
 
 
 export const userService = {
 	login(email, password) {
-	
 		const request_data = {
 			email,
 			password
 		}
-	
 		return axios.post('/api/login', request_data , config.jsonRequestConfig())
 			.then(res => {
 				if(res.data.access_token) {
@@ -30,5 +28,10 @@ export const userService = {
 				location.reload();
 			})
 			.catch(unauthorizedHandler);
-	}
+	},
+	getUser(id) {
+		return axios.get('/api/cuenta', config.jsonRequestConfig())
+			.then(getDataHandler)
+			.catch(unauthorizedHandler)
+	},
 };

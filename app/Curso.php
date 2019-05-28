@@ -15,11 +15,14 @@ class Curso extends Model
 
 
     public function portada() {
-        return $this->belongsTo(Imagen::class)->withDefault([
-            'id' => 0,
-            'tag' => 'default',
-            'url' => asset('images/placeholder.jpg')
-        ]);
+        return $this->belongsTo(Imagen::class)->withDefault( 
+            [
+                'id' => 0,
+                'tag' => 'default',
+                'url' => asset('images/placeholder.jpg'),
+                'tipo_media_id' => 'image-url'
+            ]
+        );
     }
 
     public function unidad_duracion() {

@@ -95,7 +95,6 @@ class ComentarioGrupoController extends Controller
             'tipo_adjunto' => 'sometimes|in:youtube,image'
         ]);
 
-        
         $has_adjunto = isset($data['adjunto']);
         $tipo_adjunto = $request->input('tipo_adjunto');
         
@@ -131,8 +130,7 @@ class ComentarioGrupoController extends Controller
         else if($tipo_adjunto == 'image') {
             $file = $request->file('adjunto'); 
             $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
-            $fileName = "adjunto".time().'.'.request()->file('adjunto')->getClientOriginalExtension();
-            $file->storeAs('adjuntos', $fileName);
+            $fileName = "adjunto".time().'.'.$file->getClientOriginalExtension();
 
             $s3Path = 'ceim/adjuntos/'.$fileName;
 
