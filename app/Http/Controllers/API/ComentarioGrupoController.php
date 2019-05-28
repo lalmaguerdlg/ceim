@@ -84,7 +84,12 @@ class ComentarioGrupoController extends Controller
 
         $comentario = Comentario::findOrFail($comentario_id);
         if($comentario->autor_id != $user->id) {
-            abort(403, 'Access denied');
+            if(!$user->hasRole('admin')) {
+                $maestro = $comentario->grupo()->maestro;
+                if($maestro->id != $user->id){
+                    abort(403, 'Access denied');
+                }
+            }
         }
 
         $comentario->fill($data);

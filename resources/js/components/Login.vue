@@ -26,11 +26,11 @@
 
               </v-card-text>
               <v-card-actions class="px-5 py-3">
+                <v-btn type="submit" color="primary" form="login-form" :loading="user_loading">Iniciar sesion</v-btn>
+                <v-spacer></v-spacer>
 								<div class="text-xs-right">
 									<span>¿No tienes cuenta? <router-link to="/register">Crea una cuenta</router-link></span>
 								</div>
-                <v-spacer></v-spacer>
-                <v-btn type="submit" color="primary" form="login-form" :loading="user_loading">Iniciar sesion</v-btn>
               </v-card-actions>
             </v-card>
           </v-flex>

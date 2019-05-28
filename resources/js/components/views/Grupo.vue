@@ -340,12 +340,12 @@ export default {
 					}
 				});
 		},
-		isTeacher(comment_autor) {
-			return comment_autor.id == this.grupo.maestro.id;
+		isTeacher(user) {
+			return user.id == this.grupo.maestro.id;
 		},
 		canEdit(comment) {
 			if(this.account) {
-				return comment.autor.id == this.account.id;
+				return comment.autor.id == this.account.id || this.isTeacher(this.account);
 			}
 			return false;
 		},
