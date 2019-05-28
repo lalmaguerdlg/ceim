@@ -201,6 +201,7 @@ export default {
     },
     methods: {
         ...mapActions('profile', ['fetchProfile', 'updateProfile']),
+        ...mapActions('user', ['fetchUser']),
         capitalizeFirst(rol) {
             return rol.charAt(0).toUpperCase() + rol.slice(1);
         },
@@ -224,6 +225,11 @@ export default {
         imageSelected(form) {
 			this.modals.image.imageData = form.get('data');
         },
+        reloadUser() {
+            if(this.canEdit){
+                this.fetchUser();
+            }
+        },
         async updateImage() {
             if(this.modals.image.url != '' || this.modals.image.imageData != null) {
                 try {
@@ -235,6 +241,7 @@ export default {
                         profile_data.append(this.modals.image.current, this.modals.image.imageData);
                     }
                     await this.updateProfile(profile_data);
+                    this.reloadUser();
                     this.closeEditImage();
                 }
                 catch(err) {
@@ -261,7 +268,7 @@ export default {
                         e.errors.name.forEach(v => this.errors.add({ field: 'name', msg: v}));                    
                     }
                 }
-
+                this.reloadUser();
                 this.closeEditModal();
             }
         }

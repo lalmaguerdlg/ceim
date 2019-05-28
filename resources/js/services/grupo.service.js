@@ -21,5 +21,11 @@ export const grupoService = {
 			.then(getDataHandler)
 			.catch(unauthorizedHandler)
 			.catch(unprocessableEntityHandler)
+	},
+	updateComentario(grupo_id, id, data) {
+		return axios.put(`/api/alumno/grupo/${grupo_id}/comentario/${id}`, data, config.jsonRequestConfig())
+			.then(getDataHandler)
+			.catch(unauthorizedHandler)
+			.catch(unprocessableEntityHandler)
 	}
 };

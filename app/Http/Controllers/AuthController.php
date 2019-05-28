@@ -89,7 +89,12 @@ class AuthController extends Controller
         $new_user->save();
         $new_user->roles()->attach($rol_alumno);
 
-        return $new_user;
+        $grupo = \App\Grupo::findOrFail(1);
+        \App\Inscripcion::create(
+            ['grupo_id' => $grupo->id, 'user_id' => $new_user->id ]
+        );
+
+        return $this->authenticated($request, $new_user);
     }
 
     public function logout(Request $request) 

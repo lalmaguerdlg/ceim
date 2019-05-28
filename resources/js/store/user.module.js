@@ -25,6 +25,17 @@ const getters = {
 }
 
 const actions = {
+	async register({dispatch, commit}, {email, password, name}) {
+		commit('REGISTER_REQUEST');
+		try{
+			let tokens = await userService.register(email, password, name);
+			await dispatch('fetchUser');
+			commit('REGISTER_REQUEST_SUCCESS', tokens);
+		} catch(err) {
+			commit('REGISTER_REQUEST_ERROR', err);
+			return Promise.reject(err);
+		}
+	},
 	async login({dispatch, commit}, {email, password}) {
 		commit('LOGIN_REQUEST');
 		try{
@@ -48,6 +59,25 @@ const actions = {
 }
 
 const mutations = {
+	REGISTER_REQUEST(state) {
+		state = {
+			loading: true,
+			account: null,
+			session: null,
+			loggedIn: false,
+			errors: null
+		}
+	},
+	REGISTER_REQUEST_SUCCESS(state, tokens) {
+		state.session = tokens;
+		state.loggedIn = true;
+		state.loading = false;
+		state.errors = null;
+	},
+	REGISTER_REQUEST_ERROR(state, errors) {
+		state.loading = false;
+		state.errors = errors;
+	},
 	LOGIN_REQUEST(state) {
 		state = {
 			loading: true,

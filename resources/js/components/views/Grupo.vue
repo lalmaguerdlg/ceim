@@ -63,12 +63,16 @@
 								:key="`alumno-${alumno.id}`"
 								avatar
 							>
-								<v-list-tile-avatar>
-									<img :src="alumno.avatar.url">
-								</v-list-tile-avatar>
+								<router-link :to="`/usuario/${alumno.id}`">
+									<v-list-tile-avatar >
+											<img :src="alumno.avatar.url">
+									</v-list-tile-avatar>
+								</router-link>
 
 								<v-list-tile-content>
-									<v-list-tile-title v-html="alumno.name"></v-list-tile-title>
+										<router-link :to="`/usuario/${alumno.id}`" class="route-link">
+											<v-list-tile-title v-html="alumno.name"></v-list-tile-title>
+										</router-link>
 								</v-list-tile-content>
 
 								<v-list-tile-action>
@@ -148,9 +152,10 @@
 								<v-timeline-item v-for="comment of comments" :key="`comment-${comment.id}`"
 									:color="isTeacher(comment.autor) ? 'pink' : 'teal'" 
 									small
-									class="my-1">
-									<template v-slot:icon v-if="$vuetify.breakpoint.xs">
-										<v-avatar size="40" ><img :src="comment.autor.avatar.url" alt="avatar"></v-avatar>
+									class="my-1"
+									>
+									<template v-slot:icon >
+										<v-avatar size="40" v-show="$vuetify.breakpoint.xs" ><img :src="comment.autor.avatar.url" alt="avatar"></v-avatar>
 									</template>
 									<v-card>
 										<v-card-text>
@@ -165,13 +170,16 @@
 														<span>{{comment.autor.name}}</span>
 													</v-tooltip>
 												</v-flex>
-												<v-flex xs12 sm10>
+												<v-flex xs12 sm9>
 													<div class="caption">{{comment.mensaje}}</div>
 													<v-btn v-for="adjunto of comment.adjuntos" :key="`adjunto-${adjunto.id}`"
 													flat icon @click="showContent(adjunto)"><v-icon>{{mediaType(adjunto)}}</v-icon></v-btn>		
 												</v-flex>
 												<v-flex xs12 sm1>
 													<span class="caption font-weight-thin grey--text lighten-1">{{formatDate(comment.updated_at)}}</span>
+												</v-flex>
+												<v-flex xs12 sm1>
+													<v-btn small fab v-show="canEdit(comment)" @click="editComment(comment)"> <v-icon samll>edit </v-icon></v-btn>
 												</v-flex>
 											</v-layout>
 										</v-card-text>
@@ -192,6 +200,30 @@
 			</div> -->
 			<v-img v-else :src="content.url" alt="Test"></v-img>
 		</v-dialog>
+		<v-dialog v-model="commentDialog.show" max-width="500" persistent>
+            <v-card>
+                <v-card-title><h3>Editar datos</h3></v-card-title>
+                <v-divider></v-divider>
+                <v-card-text>
+                    <v-container>
+                        <v-form @submit.prevent="saveEditComment">
+                        	<v-text-field prepend-icon="message" id="edit-message" name="edit-message" label="Mensaje" type="text"
+								v-model="commentDialog.message"
+								v-validate="'required|max:255'"
+								counter="255"
+								:error-messages="errors.collect('edit-message')"
+								data-vv-name="commentDialog.message"
+								required></v-text-field>
+                        </v-form>
+                    </v-container>
+                </v-card-text>
+                <v-divider></v-divider>
+                <v-card-actions>
+                    <v-btn color="blue darken-1" flat @click="commentDialog.show = false">Cerrar</v-btn>
+                    <v-btn color="blue darken-1" flat @click="saveEditComment">Guardar</v-btn>
+                </v-card-actions>
+            </v-card>
+        </v-dialog>
 	</div>
 	</v-container>
 </template>
@@ -223,7 +255,7 @@ export default {
 	},
 	data() {
 		return {
-			tabs: 'tabs-mensajes',
+			tabs: 'tabs-modulos',
 			message: "",
 			contentDialog: false,
 			content: { 
@@ -232,9 +264,14 @@ export default {
 			},
 			fileDialog: {
 				show: false,
-				radios: 'youtube',
+				radios: 'image',
 				fileData: null,
 				url: ''
+			},
+			commentDialog: {
+				show: false,
+				message: '',
+				id: 0,
 			},
 			dictionary: {
 				attributes: {
@@ -254,6 +291,7 @@ export default {
 		id() {
 			return this.$route.params.id;
 		},
+		...mapGetters('user', ['account']),
 		...mapGetters('grupo', ['grupo', 'grupo_loading', 'comentarios', 'comentarios_loading', 'comentario_uploading']),
 		comments() {
 			return this.soloMaestro ?  this.comentarios.filter(c => this.isTeacher(c.autor)) : this.comentarios;
@@ -266,9 +304,9 @@ export default {
 		this.fetchGrupo(this.id);
 	},
 	methods: {
-		...mapActions('grupo', ['fetchGrupo', 'fetchComentarios', 'postComentario']),
+		...mapActions('grupo', ['fetchGrupo', 'fetchComentarios', 'postComentario', 'updateComentario']),
 		async sendMessage() {
-			let valid = await this.$validator.validateAll();
+			let valid = await this.$validator.validate('message');
 			if(!valid) return;
 			let hasAttachment = false;
 			let attachment_type = this.fileDialog.radios;
@@ -302,8 +340,34 @@ export default {
 					}
 				});
 		},
-		isTeacher(autor) {
-			return autor.id == this.grupo.maestro.id;
+		isTeacher(comment_autor) {
+			return comment_autor.id == this.grupo.maestro.id;
+		},
+		canEdit(comment) {
+			if(this.account) {
+				return comment.autor.id == this.account.id;
+			}
+			return false;
+		},
+		editComment(comment) {
+			
+			this.commentDialog.message = comment.mensaje;
+			this.commentDialog.id = comment.id;
+			this.commentDialog.show = true;
+		},
+		async saveEditComment() {
+			let valid = await this.$validator.validate('commentDialog.message');
+			if(valid) {
+				let data = { 
+					grupo_id: this.id,
+					id: this.commentDialog.id,
+					comentario_data: {
+						mensaje: this.commentDialog.message 
+					}
+				};
+				await this.updateComentario(data);
+				this.commentDialog.show = false;
+			}
 		},
 		showContent(adjunto) {
 			this.contentDialog = true;

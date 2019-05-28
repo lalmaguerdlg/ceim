@@ -8,6 +8,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class Handler extends ExceptionHandler
 {
@@ -50,6 +51,11 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Exception $exception)
     {
+
+        if ($exception instanceof HttpException && $exception->getStatusCode() == 403 && $request->wantsJson()) {
+            return response()->json(['message' => 'Access denied.'], 403);
+        }
+
         if ($exception instanceof NotFoundHttpException && $request->wantsJson()) {
             return \Route::respondWithRoute('api.fallback.404');
         }

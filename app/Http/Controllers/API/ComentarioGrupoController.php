@@ -9,6 +9,8 @@ use App\Http\Resources\Comentario as ComentarioResource;
 use Illuminate\Support\Facades\Storage;
 use App\Adjunto;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Validation\UnauthorizedException;
+use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 
 class ComentarioGrupoController extends Controller
 {
@@ -22,7 +24,7 @@ class ComentarioGrupoController extends Controller
         //
         $user = $request->user();
         $grupo = $user->grupos()->findOrFail($grupo_id);
-        $comentarios = $grupo->comentarios()->with('autor.avatar', 'adjuntos')->orderBy('comentarios.updated_at', 'desc')->get();
+        $comentarios = $grupo->comentarios()->with('autor.avatar', 'adjuntos')->orderBy('comentarios.created_at', 'desc')->get();
         return ComentarioResource::collection($comentarios);
     }
 
@@ -72,9 +74,23 @@ class ComentarioGrupoController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, $grupo_id, $comentario_id)
     {
-        //
+        $user = $request->user();
+
+        $data = $request->validate([
+            'mensaje' => 'required|max:255'
+        ]);
+
+        $comentario = Comentario::findOrFail($comentario_id);
+        if($comentario->autor_id != $user->id) {
+            abort(403, 'Access denied');
+        }
+
+        $comentario->fill($data);
+        $comentario->save();
+        $comentario->load('autor.avatar', 'adjuntos');
+        return ComentarioResource::make($comentario);
     }
 
     /**

@@ -64,6 +64,17 @@ const actions = {
 			commit('POST_COMENTARIO_ERROR', error);
 			return Promise.reject(error);
 		}
+	},
+	async updateComentario({commit}, {grupo_id, id, comentario_data}) {
+		commit('UPDATE_COMENTARIO')
+		try {
+			let comentario = await grupoService.updateComentario(grupo_id, id, comentario_data);
+			commit('UPDATE_COMENTARIO_SUCCESS', comentario.data);
+		}
+		catch(error) {
+			commit('UPDATE_COMENTARIO_ERROR', error);
+			return Promise.reject(error);
+		}
 	}
 }
 
@@ -103,6 +114,19 @@ const mutations = {
 		state.error = null;
 	},
 	POST_COMENTARIO_ERROR(state, error) {
+		state.comentarios.uploading = false;
+		state.error = error;
+	},
+	UPDATE_COMENTARIO(state) {
+		state.comentarios.uploading = true;
+	},
+	UPDATE_COMENTARIO_SUCCESS(state, comentario) {
+		let foundIndex = state.comentarios.all.findIndex(c => c.id == comentario.id);
+		state.comentarios.all[foundIndex] = comentario;
+		state.error = null;
+		state.comentarios.uploading = false;
+	},
+	UPDATE_COMENTARIO_ERROR(state, error) {
 		state.comentarios.uploading = false;
 		state.error = error;
 	}

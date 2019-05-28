@@ -118,7 +118,7 @@ export default {
 		}
 	},
 	created() {
-		if(this.user == null) {
+		if(this.account == null) {
 			this.fetchUser();
 		}
 	}

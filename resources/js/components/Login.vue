@@ -6,7 +6,7 @@
           <v-flex xs12 sm8 md6>
             <v-card class="elevation-5">
               <v-toolbar flat dark >
-                <v-toolbar-title>Login form</v-toolbar-title>
+                <v-toolbar-title>Inicio de sesion</v-toolbar-title>
               </v-toolbar>
               <v-card-text class="pa-5 pb-0">
                 <v-form @submit.prevent="submit" id="login-form">
@@ -17,17 +17,18 @@
 										data-vv-name="email"
 										required></v-text-field>
                   <v-text-field prepend-icon="lock" id="password" name="password" label="Contraseña" type="password"
-				  	v-model="password"
-				  	v-validate="'required'"
-					:error-messages="errors.collect('password')"
-					data-vv-name="password"
-					required></v-text-field>
+										v-model="password"
+										v-validate="'required'"
+										:error-messages="errors.collect('password')"
+										data-vv-name="password"
+										required></v-text-field>
                 </v-form>
-				<div class="mt-2 text-xs-right">
-					<span>¿No tienes cuenta? <a href="javascript:;">Crea una cuenta</a></span>
-				</div>
+
               </v-card-text>
               <v-card-actions class="px-5 py-3">
+								<div class="text-xs-right">
+									<span>¿No tienes cuenta? <router-link to="/register">Crea una cuenta</router-link></span>
+								</div>
                 <v-spacer></v-spacer>
                 <v-btn type="submit" color="primary" form="login-form" :loading="user_loading">Iniciar sesion</v-btn>
               </v-card-actions>
@@ -41,7 +42,6 @@
 
 <script>
 
-import { userService } from '../services'
 import { mapGetters, mapActions } from 'vuex'
 
 export default {

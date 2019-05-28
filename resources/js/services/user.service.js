@@ -5,6 +5,21 @@ import { unprocessableEntityHandler, unauthorizedHandler, getDataHandler } from 
 
 
 export const userService = {
+	register(email, password, name) {
+		const request_data = {
+			email,
+			password,
+			name
+		}
+		return axios.post('/api/register', request_data, config.jsonRequestConfig())
+			.then(res => {
+				if(res.data.access_token) {
+					localStorage.setItem('user', JSON.stringify(res.data));
+				}
+				return res.data;
+			})
+			.catch(unprocessableEntityHandler);
+	},
 	login(email, password) {
 		const request_data = {
 			email,
