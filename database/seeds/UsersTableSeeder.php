@@ -15,7 +15,7 @@ class UsersTableSeeder extends Seeder
     public function run()
     {
         //factory(App\User::class, 1)->create();
-        $role = Rol::where('rol', 'admin')->first();
+        $roles = Rol::whereIn('rol', ['admin', 'maestro'])->get();
         
         $default_portada = Imagen::where('tag', 'default')->first();
         $default_avatar = Imagen::where('tag', 'default-avatar')->first();
@@ -30,7 +30,7 @@ class UsersTableSeeder extends Seeder
             'portada_id' => $default_portada->id,
         ]);
         $user->save();
-        $user->roles()->attach($role);
+        $user->roles()->attach($roles);
 
         $alumno_role = Rol::where('rol', 'alumno')->first();
         $user = App\User::create([
